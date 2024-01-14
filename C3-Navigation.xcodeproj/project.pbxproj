@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7AC908682B54DEB300620D3E /* NetworkScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC908672B54DEB300620D3E /* NetworkScanner.swift */; };
 		7AFE68F62B18989000212B22 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */; };
 		7AFF8B142B17EDD700528E32 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B132B17EDD700528E32 /* AppDelegate.swift */; };
 		7AFF8B162B17EDD700528E32 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */; };
@@ -39,6 +40,7 @@
 		7A1693542B3137C100F0D8F0 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		7A1693562B3137D400F0D8F0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		7A1693582B3137E600F0D8F0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		7AC908672B54DEB300620D3E /* NetworkScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanner.swift; sourceTree = "<group>"; };
 		7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7AFF8B102B17EDD700528E32 /* C3-Navigation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "C3-Navigation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFF8B132B17EDD700528E32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				7AFF8B132B17EDD700528E32 /* AppDelegate.swift */,
 				7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */,
 				7AFF8B172B17EDD700528E32 /* ViewController.swift */,
+				7AC908672B54DEB300620D3E /* NetworkScanner.swift */,
 				7AFF8B432B17F63F00528E32 /* Entitlements.plist */,
 				7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */,
 				7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */,
@@ -275,6 +278,7 @@
 				7AFF8B182B17EDD700528E32 /* ViewController.swift in Sources */,
 				7AFF8B142B17EDD700528E32 /* AppDelegate.swift in Sources */,
 				7AFF8B162B17EDD700528E32 /* SceneDelegate.swift in Sources */,
+				7AC908682B54DEB300620D3E /* NetworkScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -443,7 +447,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3 Navigation/Info.plist";
+				INFOPLIST_FILE = "C3-Navigation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
@@ -482,7 +486,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3 Navigation/Info.plist";
+				INFOPLIST_FILE = "C3-Navigation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;

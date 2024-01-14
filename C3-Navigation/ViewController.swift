@@ -12,9 +12,7 @@ import SystemConfiguration
 import Photos
 class ViewController: UIViewController {
     var webView: WKWebView!
-    var isSearchTimedOut = false
-	var isScanning = false
-    var isDeviceFound = false
+    var networkScanner: NetworkScanner!
     var spinner: UIActivityIndicatorView!
     var statusLabel: UILabel!
     var refreshButton: UIButton!
@@ -32,6 +30,9 @@ class ViewController: UIViewController {
         self.view.backgroundColor = UIColor.systemBackground
         webView.backgroundColor = UIColor.systemBackground
         webView.isOpaque = false
+        networkScanner = NetworkScanner()
+        networkScanner.viewController = self
+        networkScanner.delegate = self
         setupSpinner()
         setupStatusLabel()
         setupRefreshButton()
@@ -41,7 +42,7 @@ class ViewController: UIViewController {
 		startLogUpdateTimer()
         webView.navigationDelegate = self
         DispatchQueue.global(qos: .background).async {
-            self.startNetworkScan()
+            self.networkScanner.startNetworkScan()
         }
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
@@ -64,8 +65,8 @@ class ViewController: UIViewController {
     @objc func retryNetworkScan() {
         resetAppDataAndState()
         reinitializeFirstViewController()
-        isSearchTimedOut = false
-        startNetworkScan()
+        networkScanner.isSearchTimedOut = false
+        networkScanner.startNetworkScan()
         retryButton.isHidden = true
         spinner.startAnimating()
         statusLabel.text = "Searching for devices..."
@@ -91,186 +92,6 @@ class ViewController: UIViewController {
             windowScene.windows.first?.rootViewController = ViewController()
               windowScene.windows.first?.makeKeyAndVisible()
         }
-    }
-    func startNetworkScan() {
-        DispatchQueue.main.async {
-            self.isDeviceFound = false
-            self.isScanning = true
-            self.scanNetworks()
-        }
-    }
-    private func showRetryButton() {
-        DispatchQueue.main.async {
-            self.retryButton.isHidden = false
-            self.statusLabel.text = "Connection Timed Out"
-            self.spinner.stopAnimating()
-        }
-    }
-    func completeScan() {
-        DispatchQueue.main.async {
-            if !self.isDeviceFound && self.isScanning {
-                self.isSearchTimedOut = true
-                self.showRetryButton()
-                self.isScanning = false
-                print("No devices found")
-                self.appendLogMessage("No devices found")
-                self.updateLogView()
-            }
-        }
-    }
-    func getActiveNetworkInterfaces() -> [String] {
-        var interfaces = [String]()
-        var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        
-        if getifaddrs(&ifaddr) == 0 {
-            var ptr = ifaddr
-            while ptr != nil {
-                if let interface = ptr?.pointee, interface.ifa_addr.pointee.sa_family == UInt8(AF_INET) || interface.ifa_addr.pointee.sa_family == UInt8(AF_INET6) {
-                    let interfaceName = String(cString: interface.ifa_name, encoding: .utf8)
-                    if let name = interfaceName, (name == "en0" || name == "bridge100") {
-                        interfaces.append(name)
-                    }
-                }
-                ptr = ptr?.pointee.ifa_next
-            }
-            freeifaddrs(ifaddr)
-        }
-        let uniqueInterfaces = removeDuplicateInterfaces(interfaces)
-        return uniqueInterfaces
-    }
-        
-    
-    func getIPAddress(for interface: String) -> String? {
-        var address: String?
-        var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        
-        if getifaddrs(&ifaddr) == 0 {
-            var ptr = ifaddr
-            while ptr != nil {
-                let flags = Int32((ptr?.pointee.ifa_flags ?? 0))
-                let addr = ptr?.pointee.ifa_addr.pointee
-                
-                if (flags & (IFF_UP | IFF_RUNNING)) != 0 {
-                    if addr?.sa_family == UInt8(AF_INET) {
-                        let name: String = String(cString: (ptr?.pointee.ifa_name)!)
-                        if name == interface {
-                            var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                            if let addr = ptr?.pointee.ifa_addr {
-                                getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
-                                address = String(cString: hostname)
-                                print("IP Address for interface \(interface): \(address ?? "nil")")
-                                self.appendLogMessage("IP Address for interface \(interface): \(address ?? "nil")")
-                                self.updateLogView()
-                            }
-                            break
-                        }
-                    }
-                }
-                ptr = ptr?.pointee.ifa_next
-            }
-            freeifaddrs(ifaddr)
-        }
-        return address
-    }
-    private func removeDuplicateInterfaces(_ interfaces: [String]) -> [String] {
-        var uniqueSet = Set<String>()
-        var uniqueInterfaces = [String]()
-        for interface in interfaces {
-            if uniqueSet.insert(interface).inserted {
-                uniqueInterfaces.append(interface)
-            }
-        }
-        return uniqueInterfaces
-    }
-    
-    private func scanNetworks() {
-        let activeInterfaces = getActiveNetworkInterfaces()
-        if let firstInterface = activeInterfaces.first {
-            if let localIP = getIPAddress(for: firstInterface) {
-                let ipRange = calculateSubnetRange(from: localIP)
-                scanSubnetForService(ipRange: ipRange)
-            }
-        }
-    }
-    
-    func calculateSubnetRange(from localIPAddress: String) -> [String] {
-        let components = localIPAddress.split(separator: ".")
-        guard components.count == 4 else { return [] }
-        
-        let subnetBase = components.dropLast().joined(separator: ".")
-        return (1...254).map { "\(subnetBase).\($0)" }
-    }
-    
-    private func scanSubnetForService(ipRange: [String]) {
-        guard !ipRange.isEmpty && isScanning else {
-            completeScan()
-            return
-        }
-        self.isDeviceFound = false
-        let totalSequenceRepeats = 1
-        var currentCount = 0
-        for _ in 0..<totalSequenceRepeats where !isDeviceFound {
-            for ipAddress in ipRange {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
-                        if success {
-                            self.isDeviceFound = true
-                            self.isScanning = false
-                            self.loadWebPage(with: ipAddress)
-                            return
-                        }
-                    }
-                }
-            }
-            currentCount += 1
-            if currentCount == totalSequenceRepeats {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
-                    self.completeScan()
-                }
-            }
-        }
-    }
-    
-    func attemptConnection(ipAddress: String, port: Int, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "http://\(ipAddress):\(port)") else {
-            completion(false)
-            return
-        }
-        print("Pinging \(ipAddress)...")
-        self.appendLogMessage("Pinging \(ipAddress)...")
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.timeoutInterval = 10
-        let task = URLSession.shared.dataTask(with: request) { _, response, error in
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                completion(true)
-                print("Device found at \(ipAddress)")
-                self.appendLogMessage("Device found at \(ipAddress)")
-                self.loadWebPage(with: ipAddress)
-                self.isDeviceFound = true
-            } else {
-                completion(false)
-                if !self.isDeviceFound {
-                    print("Failed to connect to \(ipAddress)")
-                    self.appendLogMessage("Failed to connect to \(ipAddress)")
-                }
-            }
-        }
-        task.resume()
-    }
-	
-    private func loadWebPage(with ipAddress:String) {
-        DispatchQueue.main.async {
-            self.statusLabel.text = "Device found at \(ipAddress)..."
-            self.retryButton.isHidden = true
-            self.logTextView.isHidden = true
-            self.spinner.startAnimating()
-            self.ipLabel.text = "\(ipAddress)"
-            let url = URL(string: "http://\(ipAddress):8082")!
-            self.webView.load(URLRequest(url: url))
-            self.webView.allowsBackForwardNavigationGestures = false
-        }
-        
     }
     private func setupSpinner() {
         DispatchQueue.main.async {
@@ -389,25 +210,6 @@ class ViewController: UIViewController {
             ])
         }
     }
-
-    func appendLogMessage(_ message: String) {
-        DispatchQueue.main.async {
-            self.logBuffer.append(message)
-            
-            if self.logBuffer.count >= 100 {
-                self.updateLogView()
-            }
-        }
-    }
-	@objc func updateLogView() {
-		DispatchQueue.main.async {
-			if !self.logBuffer.isEmpty {
-				self.logTextView.text += self.logBuffer.joined(separator: "\n") + "\n"
-				self.logBuffer.removeAll()
-				self.scrollToBottom()
-			}
-		}
-	}
 
 	func scrollToBottom() {
 		let bottomRange = NSRange(location: self.logTextView.text.count - 1, length: 1)
@@ -581,5 +383,45 @@ extension ViewController: URLSessionDownloadDelegate {
             print("Download error: \(error)")
         }
     }
+    
 }
-//testing
+extension ViewController: NetworkScannerDelegate {
+    internal func showRetryButton() {
+        DispatchQueue.main.async {
+            self.retryButton.isHidden = false
+            self.statusLabel.text = "Connection Timed Out"
+            self.spinner.stopAnimating()
+        }
+    }
+    internal func loadWebPage(with ipAddress:String) {
+        DispatchQueue.main.async {
+            self.statusLabel.text = "Device found at \(ipAddress)..."
+            self.retryButton.isHidden = true
+            self.logTextView.isHidden = true
+            self.spinner.startAnimating()
+            self.ipLabel.text = "\(ipAddress)"
+            let url = URL(string: "http://\(ipAddress):8082")!
+            self.webView.load(URLRequest(url: url))
+            self.webView.allowsBackForwardNavigationGestures = false
+        }
+        
+    }
+    func appendLogMessage(_ message: String) {
+        DispatchQueue.main.async {
+            self.logBuffer.append(message)
+            
+            if self.logBuffer.count >= 100 {
+                self.updateLogView()
+            }
+        }
+    }
+    @objc func updateLogView() {
+        DispatchQueue.main.async {
+            if !self.logBuffer.isEmpty {
+                self.logTextView.text += self.logBuffer.joined(separator: "\n") + "\n"
+                self.logBuffer.removeAll()
+                self.scrollToBottom()
+            }
+        }
+    }
+}
