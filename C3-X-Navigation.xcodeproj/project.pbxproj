@@ -39,22 +39,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		7A1693542B3137C100F0D8F0 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
-		7A1693562B3137D400F0D8F0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		7A1693582B3137E600F0D8F0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		7AC908672B54DEB300620D3E /* NetworkScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanner.swift; sourceTree = "<group>"; };
 		7AC908692B551CE600620D3E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7AC9086B2B551F8C00620D3E /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		7AFF8B102B17EDD700528E32 /* C3-Navigation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "C3-Navigation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AFF8B102B17EDD700528E32 /* C3-X-Navigation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "C3-X-Navigation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFF8B132B17EDD700528E32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		7AFF8B172B17EDD700528E32 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7AFF8B212B17EDE100528E32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7AFF8B262B17EDE200528E32 /* C3-NavigationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C3-NavigationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AFF8B262B17EDE200528E32 /* C3-X-NavigationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C3-X-NavigationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFF8B2A2B17EDE200528E32 /* C3_X__NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = C3_X__NavigationTests.swift; sourceTree = "<group>"; };
-		7AFF8B302B17EDE200528E32 /* C3-NavigationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C3-NavigationUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AFF8B302B17EDE200528E32 /* C3-X-NavigationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C3-X-NavigationUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFF8B342B17EDE200528E32 /* C3_X__NavigationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = C3_X__NavigationUITests.swift; sourceTree = "<group>"; };
 		7AFF8B362B17EDE200528E32 /* C3_X__NavigationUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = C3_X__NavigationUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		7AFF8B432B17F63F00528E32 /* Entitlements.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
@@ -85,40 +82,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7A16934D2B31325300F0D8F0 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				7A1693582B3137E600F0D8F0 /* Security.framework */,
-				7A1693562B3137D400F0D8F0 /* AudioToolbox.framework */,
-				7A1693542B3137C100F0D8F0 /* CFNetwork.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		7AFF8B072B17EDD600528E32 = {
 			isa = PBXGroup;
 			children = (
 				7AC908692B551CE600620D3E /* README.md */,
 				7AC9086B2B551F8C00620D3E /* LICENSE.txt */,
-				7AFF8B122B17EDD700528E32 /* C3-Navigation */,
-				7AFF8B292B17EDE200528E32 /* C3-NavigationTests */,
-				7AFF8B332B17EDE200528E32 /* C3-NavigationUITests */,
+				7AFF8B122B17EDD700528E32 /* C3-X-Navigation */,
+				7AFF8B292B17EDE200528E32 /* C3-X-NavigationTests */,
+				7AFF8B332B17EDE200528E32 /* C3-X-NavigationUITests */,
 				7AFF8B112B17EDD700528E32 /* Products */,
-				7A16934D2B31325300F0D8F0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		7AFF8B112B17EDD700528E32 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7AFF8B102B17EDD700528E32 /* C3-Navigation.app */,
-				7AFF8B262B17EDE200528E32 /* C3-NavigationTests.xctest */,
-				7AFF8B302B17EDE200528E32 /* C3-NavigationUITests.xctest */,
+				7AFF8B102B17EDD700528E32 /* C3-X-Navigation.app */,
+				7AFF8B262B17EDE200528E32 /* C3-X-NavigationTests.xctest */,
+				7AFF8B302B17EDE200528E32 /* C3-X-NavigationUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7AFF8B122B17EDD700528E32 /* C3-Navigation */ = {
+		7AFF8B122B17EDD700528E32 /* C3-X-Navigation */ = {
 			isa = PBXGroup;
 			children = (
 				7AFF8B132B17EDD700528E32 /* AppDelegate.swift */,
@@ -130,32 +116,32 @@
 				7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */,
 				7AFF8B212B17EDE100528E32 /* Info.plist */,
 			);
-			path = "C3-Navigation";
+			path = "C3-X-Navigation";
 			sourceTree = "<group>";
 		};
-		7AFF8B292B17EDE200528E32 /* C3-NavigationTests */ = {
+		7AFF8B292B17EDE200528E32 /* C3-X-NavigationTests */ = {
 			isa = PBXGroup;
 			children = (
 				7AFF8B2A2B17EDE200528E32 /* C3_X__NavigationTests.swift */,
 			);
-			path = "C3-NavigationTests";
+			path = "C3-X-NavigationTests";
 			sourceTree = "<group>";
 		};
-		7AFF8B332B17EDE200528E32 /* C3-NavigationUITests */ = {
+		7AFF8B332B17EDE200528E32 /* C3-X-NavigationUITests */ = {
 			isa = PBXGroup;
 			children = (
 				7AFF8B342B17EDE200528E32 /* C3_X__NavigationUITests.swift */,
 				7AFF8B362B17EDE200528E32 /* C3_X__NavigationUITestsLaunchTests.swift */,
 			);
-			path = "C3-NavigationUITests";
+			path = "C3-X-NavigationUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7AFF8B0F2B17EDD700528E32 /* C3-Navigation */ = {
+		7AFF8B0F2B17EDD700528E32 /* C3-X-Navigation */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7AFF8B3A2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-Navigation" */;
+			buildConfigurationList = 7AFF8B3A2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-Navigation" */;
 			buildPhases = (
 				7AFF8B0C2B17EDD700528E32 /* Sources */,
 				7AFF8B0D2B17EDD700528E32 /* Frameworks */,
@@ -165,14 +151,14 @@
 			);
 			dependencies = (
 			);
-			name = "C3-Navigation";
+			name = "C3-X-Navigation";
 			productName = "C3(X) Navigation";
-			productReference = 7AFF8B102B17EDD700528E32 /* C3-Navigation.app */;
+			productReference = 7AFF8B102B17EDD700528E32 /* C3-X-Navigation.app */;
 			productType = "com.apple.product-type.application";
 		};
-		7AFF8B252B17EDE200528E32 /* C3-NavigationTests */ = {
+		7AFF8B252B17EDE200528E32 /* C3-X-NavigationTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7AFF8B3D2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-NavigationTests" */;
+			buildConfigurationList = 7AFF8B3D2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-NavigationTests" */;
 			buildPhases = (
 				7AFF8B222B17EDE200528E32 /* Sources */,
 				7AFF8B232B17EDE200528E32 /* Frameworks */,
@@ -183,14 +169,14 @@
 			dependencies = (
 				7AFF8B282B17EDE200528E32 /* PBXTargetDependency */,
 			);
-			name = "C3-NavigationTests";
+			name = "C3-X-NavigationTests";
 			productName = "C3(X) NavigationTests";
-			productReference = 7AFF8B262B17EDE200528E32 /* C3-NavigationTests.xctest */;
+			productReference = 7AFF8B262B17EDE200528E32 /* C3-X-NavigationTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		7AFF8B2F2B17EDE200528E32 /* C3-NavigationUITests */ = {
+		7AFF8B2F2B17EDE200528E32 /* C3-X-NavigationUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7AFF8B402B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-NavigationUITests" */;
+			buildConfigurationList = 7AFF8B402B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-NavigationUITests" */;
 			buildPhases = (
 				7AFF8B2C2B17EDE200528E32 /* Sources */,
 				7AFF8B2D2B17EDE200528E32 /* Frameworks */,
@@ -201,9 +187,9 @@
 			dependencies = (
 				7AFF8B322B17EDE200528E32 /* PBXTargetDependency */,
 			);
-			name = "C3-NavigationUITests";
+			name = "C3-X-NavigationUITests";
 			productName = "C3(X) NavigationUITests";
-			productReference = 7AFF8B302B17EDE200528E32 /* C3-NavigationUITests.xctest */;
+			productReference = 7AFF8B302B17EDE200528E32 /* C3-X-NavigationUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -229,7 +215,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7AFF8B0B2B17EDD600528E32 /* Build configuration list for PBXProject "C3-Navigation" */;
+			buildConfigurationList = 7AFF8B0B2B17EDD600528E32 /* Build configuration list for PBXProject "C3-X-Navigation" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -242,9 +228,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7AFF8B0F2B17EDD700528E32 /* C3-Navigation */,
-				7AFF8B252B17EDE200528E32 /* C3-NavigationTests */,
-				7AFF8B2F2B17EDE200528E32 /* C3-NavigationUITests */,
+				7AFF8B0F2B17EDD700528E32 /* C3-X-Navigation */,
+				7AFF8B252B17EDE200528E32 /* C3-X-NavigationTests */,
+				7AFF8B2F2B17EDE200528E32 /* C3-X-NavigationUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -312,12 +298,12 @@
 /* Begin PBXTargetDependency section */
 		7AFF8B282B17EDE200528E32 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7AFF8B0F2B17EDD700528E32 /* C3-Navigation */;
+			target = 7AFF8B0F2B17EDD700528E32 /* C3-X-Navigation */;
 			targetProxy = 7AFF8B272B17EDE200528E32 /* PBXContainerItemProxy */;
 		};
 		7AFF8B322B17EDE200528E32 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 7AFF8B0F2B17EDD700528E32 /* C3-Navigation */;
+			target = 7AFF8B0F2B17EDD700528E32 /* C3-X-Navigation */;
 			targetProxy = 7AFF8B312B17EDE200528E32 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -455,7 +441,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3-Navigation/Info.plist";
+				INFOPLIST_FILE = "C3-X-Navigation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
@@ -471,8 +457,8 @@
 				LIBRARY_SEARCH_PATHS = "";
 				MARKETING_VERSION = 1.1.1;
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X--Navigation";
-				PRODUCT_NAME = "C3-Navigation";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
+				PRODUCT_NAME = "C3-X-Navigation";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -494,7 +480,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3-Navigation/Info.plist";
+				INFOPLIST_FILE = "C3-X-Navigation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
@@ -510,8 +496,8 @@
 				LIBRARY_SEARCH_PATHS = "";
 				MARKETING_VERSION = 1.1.1;
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X--Navigation";
-				PRODUCT_NAME = "C3-Navigation";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
+				PRODUCT_NAME = "C3-X-Navigation";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -536,7 +522,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/C3-Navigation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/C3-Navigation";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/C3-X-Navigation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/C3-X-Navigation";
 			};
 			name = Debug;
 		};
@@ -556,7 +542,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/C3-Navigation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/C3-Navigation";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/C3-X-Navigation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/C3-X-Navigation";
 			};
 			name = Release;
 		};
@@ -599,7 +585,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7AFF8B0B2B17EDD600528E32 /* Build configuration list for PBXProject "C3-Navigation" */ = {
+		7AFF8B0B2B17EDD600528E32 /* Build configuration list for PBXProject "C3-X-Navigation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AFF8B382B17EDE200528E32 /* Debug */,
@@ -608,7 +594,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7AFF8B3A2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-Navigation" */ = {
+		7AFF8B3A2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-Navigation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AFF8B3B2B17EDE200528E32 /* Debug */,
@@ -617,7 +603,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7AFF8B3D2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-NavigationTests" */ = {
+		7AFF8B3D2B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-NavigationTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AFF8B3E2B17EDE200528E32 /* Debug */,
@@ -626,7 +612,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7AFF8B402B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-NavigationUITests" */ = {
+		7AFF8B402B17EDE200528E32 /* Build configuration list for PBXNativeTarget "C3-X-NavigationUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AFF8B412B17EDE200528E32 /* Debug */,
