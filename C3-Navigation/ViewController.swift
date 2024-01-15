@@ -1,6 +1,5 @@
-//
 //  ViewController.swift
-//  C3(X) Navigation
+//  C3-Navigation
 //
 //  Created by Ethan Smith on 11/29/23.
 //
@@ -11,6 +10,7 @@ import Network
 import SystemConfiguration
 import Photos
 class ViewController: UIViewController {
+    // Properties
     var webView: WKWebView!
     var networkScanner: NetworkScanner!
     var spinner: UIActivityIndicatorView!
@@ -18,11 +18,11 @@ class ViewController: UIViewController {
     var refreshButton: UIButton!
     var ipLabel: UILabel!
     var retryButton: UIButton!
-	var logTextView: UITextView!
-	var logBuffer: [String] = []
-	var logUpdateTimer: Timer?
-	var downloadAlert: UIAlertController?
-	var downloadTask: URLSessionDownloadTask?
+    var logTextView: UITextView!
+    var logBuffer: [String] = []
+    var logUpdateTimer: Timer?
+    var downloadAlert: UIAlertController?
+    var downloadTask: URLSessionDownloadTask?
     var downloadProgressLabel: UILabel?
 
     override func viewDidLoad() {
@@ -38,60 +38,22 @@ class ViewController: UIViewController {
         setupRefreshButton()
         setupIPLabel()
         setupRetryButton()
-		setupLogTextView()
-		startLogUpdateTimer()
+        setupLogTextView()
+        startLogUpdateTimer()
         webView.navigationDelegate = self
         DispatchQueue.global(qos: .background).async {
             self.networkScanner.startNetworkScan()
         }
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
-    
-	@objc func ipLabelTapped() {
-		reinitializeFirstViewController()
-	}
-	
     override func loadView() {
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         view = webView
     }
-    @objc func appBecameActive() {
-        webView.reload()
-    }
-    @objc func refreshWebView() {
-        webView.reload()
-    }
-    @objc func retryNetworkScan() {
-        resetAppDataAndState()
-        reinitializeFirstViewController()
-        networkScanner.isSearchTimedOut = false
-        networkScanner.startNetworkScan()
-        retryButton.isHidden = true
-        spinner.startAnimating()
-        statusLabel.text = "Searching for devices..."
-    }
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
-		logUpdateTimer?.invalidate()
-	}
-	func startLogUpdateTimer() {
-        logUpdateTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateLogView), userInfo: nil, repeats: true)
-    }
-    func resetAppDataAndState() {
-        UserDefaults.standard.removePersistentDomain (forName: Bundle.main.bundleIdentifier!)
-        UserDefaults.standard.synchronize()
-    }
-    func reinitializeFirstViewController() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            let window = UIWindow(windowScene: windowScene)
-            let storyboard = UIStoryboard(name: "LaunchScreen", bundle: nil)
-            storyboard.instantiateInitialViewController()
-            window.rootViewController = ViewController()
-            window.makeKeyAndVisible()
-            windowScene.windows.first?.rootViewController = ViewController()
-              windowScene.windows.first?.makeKeyAndVisible()
-        }
+        logUpdateTimer?.invalidate()
     }
     private func setupSpinner() {
         DispatchQueue.main.async {
@@ -186,7 +148,7 @@ class ViewController: UIViewController {
             self.retryButton.isHidden = true
         }
     }
-	private func setupLogTextView() {
+    private func setupLogTextView() {
         DispatchQueue.main.async {
             self.logTextView = UITextView()
             self.logTextView.translatesAutoresizingMaskIntoConstraints = false
@@ -210,12 +172,46 @@ class ViewController: UIViewController {
             ])
         }
     }
-
-	func scrollToBottom() {
-		let bottomRange = NSRange(location: self.logTextView.text.count - 1, length: 1)
-		self.logTextView.scrollRangeToVisible(bottomRange)
-	}
-
+    @objc func ipLabelTapped() {
+        reinitializeFirstViewController()
+    }
+    @objc func appBecameActive() {
+        webView.reload()
+    }
+    @objc func refreshWebView() {
+        webView.reload()
+    }
+    @objc func retryNetworkScan() {
+        resetAppDataAndState()
+        reinitializeFirstViewController()
+        networkScanner.isSearchTimedOut = false
+        networkScanner.startNetworkScan()
+        retryButton.isHidden = true
+        spinner.startAnimating()
+        statusLabel.text = "Searching for devices..."
+    }
+    func startLogUpdateTimer() {
+        logUpdateTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateLogView), userInfo: nil, repeats: true)
+    }
+    func resetAppDataAndState() {
+        UserDefaults.standard.removePersistentDomain (forName: Bundle.main.bundleIdentifier!)
+        UserDefaults.standard.synchronize()
+    }
+    func reinitializeFirstViewController() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            let window = UIWindow(windowScene: windowScene)
+            let storyboard = UIStoryboard(name: "LaunchScreen", bundle: nil)
+            storyboard.instantiateInitialViewController()
+            window.rootViewController = ViewController()
+            window.makeKeyAndVisible()
+            windowScene.windows.first?.rootViewController = ViewController()
+              windowScene.windows.first?.makeKeyAndVisible()
+        }
+    }
+    func scrollToBottom() {
+        let bottomRange = NSRange(location: self.logTextView.text.count - 1, length: 1)
+        self.logTextView.scrollRangeToVisible(bottomRange)
+    }
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         DispatchQueue.main.async {
             self.statusLabel.text = ""
@@ -233,7 +229,6 @@ class ViewController: UIViewController {
         }
     }
 }
-
 extension ViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let url = navigationAction.request.url else {
@@ -242,7 +237,6 @@ extension ViewController: WKNavigationDelegate {
         }
         
         print("URL clicked: \(url)")
-        // Replace with your specific condition to identify the download link
         if url.absoluteString.contains("/full/") && url.absoluteString.contains("8082") {
             print("Download link detected, initiating download...")
             downloadAndSaveVideo(url: url)
@@ -323,18 +317,18 @@ extension ViewController: WKNavigationDelegate {
         }
     }
 
-	private func logError(_ error: Error, function: String, line: Int) {
-		print("Error in \(function) at line \(line): \(error)")
+    private func logError(_ error: Error, function: String, line: Int) {
+        print("Error in \(function) at line \(line): \(error)")
 
-		let nsError = error as NSError
+        let nsError = error as NSError
         let userInfo = nsError.userInfo
-		print("Error code: \(nsError.code)")
-		print("Error domain: \(nsError.domain)")
+        print("Error code: \(nsError.code)")
+        print("Error domain: \(nsError.domain)")
 
         for (key, value) in userInfo {
-				print("UserInfo \(key): \(value)")
-		}
-	}
+                print("UserInfo \(key): \(value)")
+        }
+    }
 
     private func showDownloadAlert() {
         downloadAlert = UIAlertController(title: "Downloading...", message: "\n\n\n", preferredStyle: .alert)
@@ -354,15 +348,15 @@ extension ViewController: WKNavigationDelegate {
             self.present(self.downloadAlert!, animated: true, completion: nil)
         }
     }
-	
-	private func showDownloadCompleteAlert() {
-		let alert = UIAlertController(title: "Download Complete", message: "The video has been successfully downloaded and saved.", preferredStyle: .alert)
-		alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     
-		DispatchQueue.main.async {
-			self.present(alert, animated: true, completion: nil)
-		}
-	}
+    private func showDownloadCompleteAlert() {
+        let alert = UIAlertController(title: "Download Complete", message: "The video has been successfully downloaded and saved.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+    
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
 }
 extension ViewController: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didResumeAtOffset fileOffset: Int64, expectedTotalBytes: Int64) {
@@ -370,7 +364,6 @@ extension ViewController: URLSessionDownloadDelegate {
     }
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         // Handle the completion of the download
-        // This is where you would move the file from the temporary location and handle it as needed
     }
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         let progress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
