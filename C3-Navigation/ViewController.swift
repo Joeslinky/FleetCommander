@@ -124,11 +124,7 @@ class ViewController: UIViewController {
                 self.ipLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
             ])
             self.ipLabel.isHidden = true
-            
-            // Make label user-interactive
             self.ipLabel.isUserInteractionEnabled = true
-            
-            // Add UITapGestureRecognizer to label
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.ipLabelTapped))
             self.ipLabel.addGestureRecognizer(tapGesture)
         }
@@ -261,7 +257,6 @@ extension ViewController: WKNavigationDelegate {
                 return
             }
             
-            // Rename the file with the .mp4 extension
             let fileManager = FileManager.default
             let directory = localURL.deletingLastPathComponent()
             let newURL = directory.appendingPathComponent(UUID().uuidString + ".mp4")
@@ -329,14 +324,13 @@ extension ViewController: WKNavigationDelegate {
     private func showDownloadAlert() {
         downloadAlert = UIAlertController(title: "Downloading...", message: "\n\n\n", preferredStyle: .alert)
 
-        // Adjust the positions to place the label above the spinner
         downloadProgressLabel = UILabel(frame: CGRect(x: 20, y: 45, width: 230, height: 20))
         downloadProgressLabel?.textAlignment = .center
         downloadProgressLabel?.text = "0%"
         downloadAlert?.view.addSubview(downloadProgressLabel!)
 
         let spinner = UIActivityIndicatorView(style: .large)
-        spinner.center = CGPoint(x: 135.0, y: 85.5) // Position adjusted
+        spinner.center = CGPoint(x: 135.0, y: 85.5)
         spinner.startAnimating()
         downloadAlert?.view.addSubview(spinner)
 
