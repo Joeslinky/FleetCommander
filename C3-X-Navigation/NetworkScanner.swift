@@ -128,7 +128,33 @@ class NetworkScanner {
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
     private func scanSubnetForService(ipRange: [String]) {
-        // Implementation remains the same.
+        guard !ipRange.isEmpty && isScanning else {
+            completeScan()
+            return
+        }
+        self.isDeviceFound = false
+        let totalSequenceRepeats = 1
+        var currentCount = 0
+        for _ in 0..<totalSequenceRepeats where !isDeviceFound {
+            for ipAddress in ipRange {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
+                        if success {
+                            self.isDeviceFound = true
+                            self.isScanning = false
+                            self.delegate?.loadWebPage(with: ipAddress)
+                            return
+                        }
+                    }
+                }
+            }
+            currentCount += 1
+            if currentCount == totalSequenceRepeats {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                    self.completeScan()
+                }
+            }
+        }
     }
     
     /// Attempts to establish a connection to a specific IP address and port.
@@ -137,7 +163,31 @@ class NetworkScanner {
     /// - port: The port number for the connection.
     /// - completion: A closure to execute upon completion, returning a boolean indicating success.
     private func attemptConnection(ipAddress: String, port: Int, completion: @escaping (Bool) -> Void) {
-        // Implementation remains the same.
+        guard let url = URL(string: "http://\(ipAddress):\(port)") else {
+            completion(false)
+            return
+        }
+        print("Pinging \(ipAddress)...")
+        delegate?.appendLogMessage("Pinging \(ipAddress)...")
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10
+        let task = URLSession.shared.dataTask(with: request) { _, response, error in
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                completion(true)
+                print("Device found at \(ipAddress)")
+                self.delegate?.appendLogMessage("Device found at \(ipAddress)")
+                self.delegate?.loadWebPage(with: ipAddress)
+                self.isDeviceFound = true
+            } else {
+                completion(false)
+                if !self.isDeviceFound {
+                    print("Failed to connect to \(ipAddress)")
+                    self.delegate?.appendLogMessage("Failed to connect to \(ipAddress)")
+                }
+            }
+        }
+        task.resume()
     }
     
     /// Logs a message and updates the delegate.

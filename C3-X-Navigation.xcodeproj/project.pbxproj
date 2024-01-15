@@ -455,7 +455,7 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
 				PRODUCT_NAME = "C3-X-Navigation";
@@ -494,7 +494,7 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
 				PRODUCT_NAME = "C3-X-Navigation";

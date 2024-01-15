@@ -24,7 +24,6 @@ class ViewController: UIViewController {
     var downloadAlert: UIAlertController?
     var downloadTask: URLSessionDownloadTask?
     var downloadProgressLabel: UILabel?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.systemBackground
@@ -82,7 +81,6 @@ class ViewController: UIViewController {
             self.statusLabel.font = UIFont.systemFont(ofSize: 16)
             self.statusLabel.text = "Searching for devices..."
             self.view.addSubview(self.statusLabel)
-            
             NSLayoutConstraint.activate([
                 self.statusLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
                 self.statusLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -40),
@@ -94,12 +92,12 @@ class ViewController: UIViewController {
     private func setupRefreshButton() {
         DispatchQueue.main.async {
             self.refreshButton = UIButton(type: .system)
+            self.refreshButton.tintColor = UIColor.systemBlue
             let refreshImage = UIImage(systemName: "arrow.clockwise")
             self.refreshButton.setImage(refreshImage, for: .normal)
             self.refreshButton.addTarget(self, action: #selector(self.refreshWebView), for: .touchUpInside)
             self.view.addSubview(self.refreshButton)
             self.refreshButton.translatesAutoresizingMaskIntoConstraints = false
-            
             NSLayoutConstraint.activate([
                 self.refreshButton.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
                 self.refreshButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
@@ -107,20 +105,30 @@ class ViewController: UIViewController {
                 self.refreshButton.heightAnchor.constraint(equalToConstant: 44)
             ])
             self.refreshButton.isHidden = true
+            self.refreshButton.isUserInteractionEnabled = true
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.refreshWebView))
+            self.refreshButton.addGestureRecognizer(tapGesture)
         }
     }
     private func setupIPLabel() {
         DispatchQueue.main.async {
             self.ipLabel = UILabel()
-            self.ipLabel.textColor = self.view.tintColor
-            self.ipLabel.textAlignment = .left
+            self.ipLabel.textColor = UIColor.systemBlue
+            if self.traitCollection.userInterfaceStyle == .dark {
+                self.ipLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+            } else {
+                self.ipLabel.backgroundColor = UIColor.white.withAlphaComponent(0.7)
+            }
+            self.ipLabel.textAlignment = .center
             self.ipLabel.font = UIFont.systemFont(ofSize: 16)
             self.view.addSubview(self.ipLabel)
             self.ipLabel.translatesAutoresizingMaskIntoConstraints = false
-            
+            self.ipLabel.numberOfLines = 1
+            self.ipLabel.layer.cornerRadius = 10
+            self.ipLabel.layer.masksToBounds = true
             NSLayoutConstraint.activate([
                 self.ipLabel.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-                self.ipLabel.bottomAnchor.constraint(equalTo: self.refreshButton.bottomAnchor),
+                self.ipLabel.bottomAnchor.constraint(equalTo: self.refreshButton.topAnchor, constant: 60),
                 self.ipLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
             ])
             self.ipLabel.isHidden = true
@@ -132,6 +140,7 @@ class ViewController: UIViewController {
     private func setupRetryButton() {
         DispatchQueue.main.async {
             self.retryButton = UIButton(type: .system)
+            self.retryButton.tintColor = UIColor.systemBlue
             self.retryButton.setTitle("Retry", for: .normal)
             self.retryButton.addTarget(self, action: #selector(self.retryNetworkScan), for: .touchUpInside)
             self.view.addSubview(self.retryButton)
@@ -200,7 +209,7 @@ class ViewController: UIViewController {
             window.rootViewController = ViewController()
             window.makeKeyAndVisible()
             windowScene.windows.first?.rootViewController = ViewController()
-              windowScene.windows.first?.makeKeyAndVisible()
+            windowScene.windows.first?.makeKeyAndVisible()
         }
     }
     func scrollToBottom() {
@@ -230,7 +239,6 @@ extension ViewController: WKNavigationDelegate {
             decisionHandler(.allow)
             return
         }
-        
         print("URL clicked: \(url)")
         if url.absoluteString.contains("/full/") && url.absoluteString.contains("8082") {
             print("Download link detected, initiating download...")
@@ -251,12 +259,10 @@ extension ViewController: WKNavigationDelegate {
                 print("Download error: \(error)")
                 return
             }
-            
             guard let localURL = localURL else {
                 print("Local URL not found")
                 return
             }
-            
             let fileManager = FileManager.default
             let directory = localURL.deletingLastPathComponent()
             let newURL = directory.appendingPathComponent(UUID().uuidString + ".mp4")
@@ -277,22 +283,17 @@ extension ViewController: WKNavigationDelegate {
                         print("Error: Could not create asset change request.")
                         return
                     }
-
                     let assetPlaceholder = assetChangeRequest.placeholderForCreatedAsset
                     let options = PHFetchOptions()
                     options.predicate = NSPredicate(format: "title = %@", "FleetCommander")
                     let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: options)
-
                     let assetCollectionChangeRequest: PHAssetCollectionChangeRequest
-                    
                     if let album = collection.firstObject {
                         assetCollectionChangeRequest = PHAssetCollectionChangeRequest(for: album)!
                     } else {
                         assetCollectionChangeRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "FleetCommander")
                     }
-
                     assetCollectionChangeRequest.addAssets([assetPlaceholder!] as NSArray)
-
                 }) { success, error in
                     if let error = error {
                         print("Error saving video to album: \(error)")
@@ -311,7 +312,6 @@ extension ViewController: WKNavigationDelegate {
     }
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
-        
         let nsError = error as NSError
         let userInfo = nsError.userInfo
         print("Error code: \(nsError.code)")
@@ -323,17 +323,14 @@ extension ViewController: WKNavigationDelegate {
     }
     private func showDownloadAlert() {
         downloadAlert = UIAlertController(title: "Downloading...", message: "\n\n\n", preferredStyle: .alert)
-
         downloadProgressLabel = UILabel(frame: CGRect(x: 20, y: 45, width: 230, height: 20))
         downloadProgressLabel?.textAlignment = .center
         downloadProgressLabel?.text = "0%"
         downloadAlert?.view.addSubview(downloadProgressLabel!)
-
         let spinner = UIActivityIndicatorView(style: .large)
         spinner.center = CGPoint(x: 135.0, y: 85.5)
         spinner.startAnimating()
         downloadAlert?.view.addSubview(spinner)
-
         DispatchQueue.main.async {
             self.present(self.downloadAlert!, animated: true, completion: nil)
         }
@@ -341,7 +338,6 @@ extension ViewController: WKNavigationDelegate {
     private func showDownloadCompleteAlert() {
         let alert = UIAlertController(title: "Download Complete", message: "The video has been successfully downloaded and saved.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-    
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
         }
@@ -367,14 +363,14 @@ extension ViewController: URLSessionDownloadDelegate {
     }
 }
 extension ViewController: NetworkScannerDelegate {
-    internal func showRetryButton() {
+    func showRetryButton() {
         DispatchQueue.main.async {
             self.retryButton.isHidden = false
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
         }
     }
-    internal func loadWebPage(with ipAddress:String) {
+    func loadWebPage(with ipAddress:String) {
         DispatchQueue.main.async {
             self.statusLabel.text = "Device found at \(ipAddress)..."
             self.retryButton.isHidden = true
@@ -385,7 +381,6 @@ extension ViewController: NetworkScannerDelegate {
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
         }
-        
     }
     func appendLogMessage(_ message: String) {
         DispatchQueue.main.async {

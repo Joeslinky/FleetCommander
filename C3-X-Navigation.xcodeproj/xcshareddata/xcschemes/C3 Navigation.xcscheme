@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7AFF8B0F2B17EDD700528E32"
-               BuildableName = "C3-Navigation.app"
+               BuildableName = "C3-X-Navigation.app"
                BlueprintName = "C3-X-Navigation"
                ReferencedContainer = "container:C3-X-Navigation.xcodeproj">
             </BuildableReference>
@@ -44,7 +44,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7AFF8B0F2B17EDD700528E32"
-            BuildableName = "C3-Navigation.app"
+            BuildableName = "C3-X-Navigation.app"
             BlueprintName = "C3-X-Navigation"
             ReferencedContainer = "container:C3-X-Navigation.xcodeproj">
          </BuildableReference>
@@ -73,7 +73,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7AFF8B0F2B17EDD700528E32"
-            BuildableName = "C3-Navigation.app"
+            BuildableName = "C3-X-Navigation.app"
             BlueprintName = "C3-X-Navigation"
             ReferencedContainer = "container:C3-X-Navigation.xcodeproj">
          </BuildableReference>
