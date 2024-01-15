@@ -26,9 +26,6 @@ class ViewController: UIViewController {
     var downloadProgressLabel: UILabel?
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = UIColor.systemBackground
-        webView.backgroundColor = UIColor.systemBackground
-        webView.isOpaque = false
         networkScanner = NetworkScanner()
         networkScanner.viewController = self
         networkScanner.delegate = self
@@ -39,16 +36,34 @@ class ViewController: UIViewController {
         setupRetryButton()
         setupLogTextView()
         startLogUpdateTimer()
-        webView.navigationDelegate = self
         DispatchQueue.global(qos: .background).async {
             self.networkScanner.startNetworkScan()
         }
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
-    }
-    override func loadView() {
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        view = webView
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        self.view.addSubview(webView)
+        self.view.sendSubviewToBack(webView)
+        self.view.backgroundColor = UIColor.systemBackground
+        webView.backgroundColor = UIColor.systemBackground
+        webView.isOpaque = false
+        webView.navigationDelegate = self
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.bounces = false
+        webView.scrollView.delegate = self
+    }
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        webView.frame = view.bounds
     }
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -398,6 +413,13 @@ extension ViewController: NetworkScannerDelegate {
                 self.logBuffer.removeAll()
                 self.scrollToBottom()
             }
+        }
+    }
+}
+extension ViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y > scrollView.contentSize.height - scrollView.frame.size.height {
+            scrollView.contentOffset.y = scrollView.contentSize.height - scrollView.frame.size.height
         }
     }
 }
