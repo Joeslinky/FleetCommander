@@ -133,7 +133,6 @@ class ViewController: UIViewController {
             self.ipLabel.addGestureRecognizer(tapGesture)
         }
     }
-
     private func setupRetryButton() {
         DispatchQueue.main.async {
             self.retryButton = UIButton(type: .system)
@@ -275,7 +274,6 @@ extension ViewController: WKNavigationDelegate {
         }
         downloadTask.resume()
     }
-
     private func saveVideoToAlbum(localURL: URL) {
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
@@ -316,20 +314,18 @@ extension ViewController: WKNavigationDelegate {
             }
         }
     }
-
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
-
+        
         let nsError = error as NSError
         let userInfo = nsError.userInfo
         print("Error code: \(nsError.code)")
         print("Error domain: \(nsError.domain)")
-
+        
         for (key, value) in userInfo {
-                print("UserInfo \(key): \(value)")
+            print("UserInfo \(key): \(value)")
         }
     }
-
     private func showDownloadAlert() {
         downloadAlert = UIAlertController(title: "Downloading...", message: "\n\n\n", preferredStyle: .alert)
 
@@ -348,7 +344,6 @@ extension ViewController: WKNavigationDelegate {
             self.present(self.downloadAlert!, animated: true, completion: nil)
         }
     }
-    
     private func showDownloadCompleteAlert() {
         let alert = UIAlertController(title: "Download Complete", message: "The video has been successfully downloaded and saved.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -376,7 +371,6 @@ extension ViewController: URLSessionDownloadDelegate {
             print("Download error: \(error)")
         }
     }
-    
 }
 extension ViewController: NetworkScannerDelegate {
     internal func showRetryButton() {

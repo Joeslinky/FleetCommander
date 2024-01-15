@@ -55,7 +55,6 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        
         return Array(Set(interfaces)) // Remove duplicates
     }
     
