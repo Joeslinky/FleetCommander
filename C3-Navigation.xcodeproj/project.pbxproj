@@ -98,6 +98,8 @@
 		7AFF8B072B17EDD600528E32 = {
 			isa = PBXGroup;
 			children = (
+				7AC908692B551CE600620D3E /* README.md */,
+				7AC9086B2B551F8C00620D3E /* LICENSE.txt */,
 				7AFF8B122B17EDD700528E32 /* C3-Navigation */,
 				7AFF8B292B17EDE200528E32 /* C3-NavigationTests */,
 				7AFF8B332B17EDE200528E32 /* C3-NavigationUITests */,
@@ -123,8 +125,6 @@
 				7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */,
 				7AFF8B172B17EDD700528E32 /* ViewController.swift */,
 				7AC908672B54DEB300620D3E /* NetworkScanner.swift */,
-				7AC908692B551CE600620D3E /* README.md */,
-				7AC9086B2B551F8C00620D3E /* LICENSE.txt */,
 				7AFF8B432B17F63F00528E32 /* Entitlements.plist */,
 				7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */,
 				7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */,
