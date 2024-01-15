@@ -445,6 +445,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app requires access to add videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to save downloaded videos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = LaunchScreen;
@@ -457,7 +459,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				MARKETING_VERSION = 1.1.2;
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X--Navigation";
 				PRODUCT_NAME = "C3-X-Navigation";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -484,6 +486,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app requires access to add videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to save downloaded videos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = LaunchScreen;
@@ -496,7 +500,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				MARKETING_VERSION = 1.1.2;
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X-Navigation";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.openpilot.primeless-carplay.C3-X--Navigation";
 				PRODUCT_NAME = "C3-X-Navigation";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
