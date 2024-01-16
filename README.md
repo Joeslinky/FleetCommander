@@ -4,7 +4,7 @@ FleetCommander is an advanced iOS app designed specifically for OpenPilot enthus
 
 ## Key Features
 
-- **Comprehensive Vehicle Management:** Easily access drive recordings, screen recordings, and error logs via FleetManager. Keep informed and in control of your driving data.
+- **Comprehensive Vehicle Management:** Easily access drive recordings, screen recordings, and error logs via Fleet Manager. Keep informed and in control of your driving data.
 - **Advanced Destination Setting:** Set your destinations directly from your iPhone. Simplify your journey planning, whether it's a routine trip or a new route.
 - **Real-Time Syncing:** Experience seamless synchronization with your C3 device. FleetCommander adapts in real-time to changes in your plans.
 - **Intuitive User Interface:** Enjoy a user-friendly interface that is both simple and powerful, suitable for tech enthusiasts and casual users alike.
@@ -24,7 +24,7 @@ To install FleetCommander, follow these steps:
 
 ## Usage
 
-After installation, launch FleetCommander on your iOS device and follow the in-app instructions to connect to your C3/C3X device running FleetManager.
+After installation, launch FleetCommander on your iOS device and follow the in-app instructions to connect to your C3/C3X device running Fleet Manager.
 
 ## Contributing
 
