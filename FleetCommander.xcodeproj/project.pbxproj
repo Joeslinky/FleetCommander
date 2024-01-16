@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7A21AE3A2B57347A00B853CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A21AE392B57347A00B853CD /* Assets.xcassets */; };
 		7AC908682B54DEB300620D3E /* NetworkScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC908672B54DEB300620D3E /* NetworkScanner.swift */; };
 		7AC9086A2B551CE600620D3E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 7AC908692B551CE600620D3E /* README.md */; };
 		7AC9086C2B551F8C00620D3E /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7AC9086B2B551F8C00620D3E /* LICENSE.txt */; };
@@ -14,7 +15,6 @@
 		7AFF8B142B17EDD700528E32 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B132B17EDD700528E32 /* AppDelegate.swift */; };
 		7AFF8B162B17EDD700528E32 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */; };
 		7AFF8B182B17EDD700528E32 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B172B17EDD700528E32 /* ViewController.swift */; };
-		7AFF8B1D2B17EDE100528E32 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */; };
 		7AFF8B2B2B17EDE200528E32 /* C3_X__NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B2A2B17EDE200528E32 /* C3_X__NavigationTests.swift */; };
 		7AFF8B352B17EDE200528E32 /* C3_X__NavigationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B342B17EDE200528E32 /* C3_X__NavigationUITests.swift */; };
 		7AFF8B372B17EDE200528E32 /* C3_X__NavigationUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF8B362B17EDE200528E32 /* C3_X__NavigationUITestsLaunchTests.swift */; };
@@ -39,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7A21AE392B57347A00B853CD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7AC908672B54DEB300620D3E /* NetworkScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanner.swift; sourceTree = "<group>"; };
 		7AC908692B551CE600620D3E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7AC9086B2B551F8C00620D3E /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -47,7 +48,6 @@
 		7AFF8B132B17EDD700528E32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFF8B152B17EDD700528E32 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		7AFF8B172B17EDD700528E32 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "/Users/joeslinky/Desktop/C3-X-Navigation/C3-X-Navigation/Assets.xcassets"; sourceTree = "<absolute>"; };
 		7AFF8B212B17EDE100528E32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7AFF8B262B17EDE200528E32 /* FleetCommanderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FleetCommanderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFF8B2A2B17EDE200528E32 /* C3_X__NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = C3_X__NavigationTests.swift; sourceTree = "<group>"; };
@@ -112,7 +112,7 @@
 				7AFF8B172B17EDD700528E32 /* ViewController.swift */,
 				7AC908672B54DEB300620D3E /* NetworkScanner.swift */,
 				7AFF8B432B17F63F00528E32 /* Entitlements.plist */,
-				7AFF8B1C2B17EDE100528E32 /* Assets.xcassets */,
+				7A21AE392B57347A00B853CD /* Assets.xcassets */,
 				7AFE68F52B18988E00212B22 /* LaunchScreen.storyboard */,
 				7AFF8B212B17EDE100528E32 /* Info.plist */,
 			);
@@ -241,9 +241,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				7AFF8B442B17F64600528E32 /* Entitlements.plist in Resources */,
-				7AFF8B1D2B17EDE100528E32 /* Assets.xcassets in Resources */,
 				7AC9086A2B551CE600620D3E /* README.md in Resources */,
 				7AC9086C2B551F8C00620D3E /* LICENSE.txt in Resources */,
+				7A21AE3A2B57347A00B853CD /* Assets.xcassets in Resources */,
 				7AFE68F62B18989000212B22 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -441,7 +441,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3-X-Navigation/Info.plist";
+				INFOPLIST_FILE = FleetCommander/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
@@ -482,7 +482,7 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "C3-X-Navigation/Info.plist";
+				INFOPLIST_FILE = FleetCommander/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FleetCommander;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainStoryboardFile = LaunchScreen;
