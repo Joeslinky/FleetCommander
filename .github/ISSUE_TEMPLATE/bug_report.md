@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG] Your Title Here"
+title: "[BUG] *Your Title Here*"
 labels: ''
 assignees: Joeslinky
 
@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **App Version (please complete the following information):**
- - Version [e.g. 22]
+ - Version [e.g. 1.1.1]
 
 **iOS Device (please complete the following information):**
  - Device: [e.g. iPhone6]
