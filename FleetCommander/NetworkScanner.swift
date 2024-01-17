@@ -105,26 +105,37 @@ class NetworkScanner {
     
     /// Initiates a scan of the networks based on active interfaces.
     private func scanNetworks() {
-        guard let localIP = getActiveNetworkInterfaces().compactMap(getIPAddress).first else {
+        let interfaces = getActiveNetworkInterfaces()
+        guard let localIP = interfaces.compactMap(getIPAddress).first else {
             completeScan()
             return
         }
-        
-        let ipRange = calculateSubnetRange(from: localIP)
+
+        let interface = interfaces.first(where: { $0 == "utun0" || $0 == "utun1" }) ?? "en0"
+        let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
         scanSubnetForService(ipRange: ipRange)
     }
     
     /// Calculates the subnet range based on the given local IP address.
     /// - Parameter localIPAddress: The local IP address.
     /// - Returns: An array of IP addresses in the subnet.
-    private func calculateSubnetRange(from localIPAddress: String) -> [String] {
+    private func calculateSubnetRange(from localIPAddress: String, forInterface interface: String) -> [String] {
         let components = localIPAddress.split(separator: ".")
-        let subnetBase = components.dropLast().joined(separator: ".")
-        
         guard components.count == 4 else { return [] }
-        return (1...254).map { "\(subnetBase).\($0)" }
+
+        if interface == "utun0" || interface == "utun1" {
+            let subnetBase = components[0...1].joined(separator: ".")
+            return (0...255).flatMap { firstOctet in
+                (0...255).map { secondOctet in
+                    "\(subnetBase).\(firstOctet).\(secondOctet)"
+                }
+            }
+        } else {
+            let subnetBase = components.dropLast().joined(separator: ".")
+            return (1...254).map { "\(subnetBase).\($0)" }
+        }
     }
-    
+
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
     private func scanSubnetForService(ipRange: [String]) {
