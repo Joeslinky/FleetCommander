@@ -55,8 +55,8 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        return Array(Set(interfaces)) // Remove duplicates
-        self.logMessage("\(interfaces)")
+        self.logMessage("Active network interfaces: \(interfaces)")
+        return Array(Set(interfaces))
     }
     
     /// Checks if the network interface is valid for scanning.
