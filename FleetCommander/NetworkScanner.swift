@@ -64,7 +64,7 @@ class NetworkScanner {
     /// - Returns: A Boolean indicating if the interface is valid.
     private func isValidInterface(_ interface: ifaddrs) -> Bool {
         let interfaceName = String(cString: interface.ifa_name)
-        return (interface.ifa_addr.pointee.sa_family == UInt8(AF_INET) || interface.ifa_addr.pointee.sa_family == UInt8(AF_INET6)) &&
+        return (interface.ifa_addr.pointee.sa_family == UInt8(AF_INET)) &&
         (interfaceName == "en0" || interfaceName == "bridge100" || interfaceName == "utun0" || interfaceName == "utun1")
     }
     
