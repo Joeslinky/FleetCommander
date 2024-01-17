@@ -99,40 +99,41 @@ class NetworkScanner {
     }
 
     /// Initiates a scan of the networks based on active interfaces.
+    /// Initiates a scan of all active network interfaces.
     private func scanNetworks() {
         let interfaces = getActiveNetworkInterfaces()
-        guard let localIP = interfaces.compactMap(getIPAddress).first else {
+        if interfaces.isEmpty {
             completeScan()
             return
         }
 
-        guard let interface = interfaces.first else {
-            completeScan()
-            return
+        for interface in interfaces {
+            let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
+            scanSubnetForService(ipRange: ipRange, interface: interface)
         }
-        let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
-        scanSubnetForService(ipRange: ipRange)
     }
+
     
     /// Calculates the subnet range based on the given local IP address.
-    /// - Parameter localIPAddress: The local IP address.
+    /// - Parameters:
+    ///   - localIPAddress: The local IP address.
+    ///   - interface: The network interface.
     /// - Returns: An array of IP addresses in the subnet.
     private func calculateSubnetRange(from localIPAddress: String, forInterface interface: String) -> [String] {
         let components = localIPAddress.split(separator: ".")
         guard components.count == 4 else { return [] }
 
-        if interface == "utun0" || interface == "utun1" || interface == "utun2" || interface == "utun3" {
+        if interface.hasPrefix("utun") {
             let subnetBase = components[0...1].joined(separator: ".")
-            return (0...255).flatMap { firstOctet in
-                (0...255).map { secondOctet in
-                    "\(subnetBase).\(firstOctet).\(secondOctet)"
-                }
+            return (0...1023).map { offset in
+                "\(subnetBase).\(offset)"
             }
         } else {
             let subnetBase = components.dropLast().joined(separator: ".")
             return (1...254).map { "\(subnetBase).\($0)" }
         }
     }
+
 
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
