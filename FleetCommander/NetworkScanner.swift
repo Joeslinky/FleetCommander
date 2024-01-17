@@ -106,7 +106,10 @@ class NetworkScanner {
             return
         }
 
-        let interface = interfaces.first()
+        guard let interface = interfaces.first else {
+            completeScan()
+            return
+        }
         let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
         scanSubnetForService(ipRange: ipRange)
     }
