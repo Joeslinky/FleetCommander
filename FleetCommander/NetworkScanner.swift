@@ -106,7 +106,7 @@ class NetworkScanner {
                 scanSubnetForService(ipRange: ipRange)
             }
         }
-        completeScan()
+        //completeScan()
     }
     
     /// Calculates the subnet range based on the given local IP address.
@@ -115,14 +115,17 @@ class NetworkScanner {
     ///   - interface: The network interface.
     /// - Returns: An array of IP addresses in the subnet.
     private func calculateSubnetRange(from localIPAddress: String, forInterface interface: String) -> [String] {
-        let components = localIPAddress.split(separator: ".")
+        let components = localIPAddress.split(separator: ".").compactMap { Int($0) }
         guard components.count == 4 else { return [] }
         if interface.hasPrefix("utun") {
-            let subnetBase = components[0...1].joined(separator: ".")
-            return (0..<1024).map { offset in
-                let thirdOctet = (offset / 4) % 256
-                let fourthOctet = (offset % 256)
-                return "\(subnetBase).\(thirdOctet).\(fourthOctet)"
+            let networkPart = (components[0] << 2) | (components[1] >> 6)
+            let firstOctet = networkPart >> 2
+            let secondOctet = (networkPart & 0b11) << 6
+            return (0..<(1 << 22)).map { offset in
+                let thirdOctet = (offset >> 16) & 0xFF
+                let fourthOctet = (offset >> 8) & 0xFF
+                let fifthOctet = offset & 0xFF
+                return "\(firstOctet).\(secondOctet + thirdOctet).\(fourthOctet).\(fifthOctet)"
             }
         } else {
             let subnetBase = components.dropLast().joined(separator: ".")
