@@ -42,11 +42,8 @@ class NetworkScanner {
     private func getActiveNetworkInterfaces() -> [String] {
         var interfaces = [String]()
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        
-        // Get the list of network interfaces.
         if getifaddrs(&ifaddr) == 0 {
             defer { freeifaddrs(ifaddr) }
-            
             var ptr = ifaddr
             while ptr != nil {
                 if let interface = ptr?.pointee, isValidInterface(interface) {
@@ -73,12 +70,10 @@ class NetworkScanner {
     private func getIPAddress(for interface: String) -> String? {
         var address: String?
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-            
         if getifaddrs(&ifaddr) == 0 {
             var ptr = ifaddr
             while ptr != nil {
                 let interfaceName = String(cString: (ptr?.pointee.ifa_name)!)
-
                 if let flags = ptr?.pointee.ifa_flags, let addr = ptr?.pointee.ifa_addr, Int32(flags) & (IFF_UP | IFF_RUNNING) != 0 {
                     if addr.pointee.sa_family == UInt8(AF_INET) {
                         if interfaceName == interface {
@@ -105,13 +100,13 @@ class NetworkScanner {
             completeScan()
             return
         }
-
         for interface in interfaces {
             if let localIP = getIPAddress(for: interface) { // Get local IP for each interface
                 let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
                 scanSubnetForService(ipRange: ipRange)
             }
         }
+        completeScan()
     }
     
     /// Calculates the subnet range based on the given local IP address.
@@ -122,7 +117,6 @@ class NetworkScanner {
     private func calculateSubnetRange(from localIPAddress: String, forInterface interface: String) -> [String] {
         let components = localIPAddress.split(separator: ".")
         guard components.count == 4 else { return [] }
-
         if interface.hasPrefix("utun") {
             let subnetBase = components[0...1].joined(separator: ".")
             return (0..<1024).map { offset in
@@ -139,30 +133,18 @@ class NetworkScanner {
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
     private func scanSubnetForService(ipRange: [String]) {
-        guard !ipRange.isEmpty && isScanning else {
+        guard !ipRange.isEmpty && isScanning && !isDeviceFound else {
             completeScan()
             return
         }
-        self.isDeviceFound = false
-        let totalSequenceRepeats = 1
-        var currentCount = 0
-        for _ in 0..<totalSequenceRepeats where !isDeviceFound {
-            for ipAddress in ipRange {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
-                        if success {
-                            self.isDeviceFound = true
-                            self.isScanning = false
-                            self.delegate?.loadWebPage(with: ipAddress)
-                            return
-                        }
+        for ipAddress in ipRange {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
+                    if success {
+                        self.isDeviceFound = true
+                        self.isScanning = false
+                        self.delegate?.loadWebPage(with: ipAddress)
                     }
-                }
-            }
-            currentCount += 1
-            if currentCount == totalSequenceRepeats {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
-                    self.completeScan()
                 }
             }
         }
