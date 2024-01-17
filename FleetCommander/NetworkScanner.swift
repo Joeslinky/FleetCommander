@@ -125,15 +125,16 @@ class NetworkScanner {
 
         if interface.hasPrefix("utun") {
             let subnetBase = components[0...1].joined(separator: ".")
-            return (0...1023).map { offset in
-                "\(subnetBase).\(offset)"
+            return (0..<1024).map { offset in
+                let thirdOctet = (offset / 4) % 256
+                let fourthOctet = (offset % 4) * 64
+                return "\(subnetBase).\(thirdOctet).\(fourthOctet)"
             }
         } else {
             let subnetBase = components.dropLast().joined(separator: ".")
             return (1...254).map { "\(subnetBase).\($0)" }
         }
     }
-
 
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
