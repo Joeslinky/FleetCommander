@@ -55,7 +55,6 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        self.logMessage("Active network interfaces: \(Array(Set(interfaces)))")
         return Array(Set(interfaces))
     }
     
@@ -79,7 +78,6 @@ class NetworkScanner {
             var ptr = ifaddr
             while ptr != nil {
                 let interfaceName = String(cString: (ptr?.pointee.ifa_name)!)
-                self.logMessage("Interface detected: \(interfaceName)")
 
                 if let flags = ptr?.pointee.ifa_flags, let addr = ptr?.pointee.ifa_addr, Int32(flags) & (IFF_UP | IFF_RUNNING) != 0 {
                     if addr.pointee.sa_family == UInt8(AF_INET) {
@@ -108,7 +106,7 @@ class NetworkScanner {
             return
         }
 
-        let interface = interfaces.first(where: { $0 == "utun0" || $0 == "utun1" }) ?? "en0"
+        let interface = interfaces.first()
         let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
         scanSubnetForService(ipRange: ipRange)
     }
@@ -120,7 +118,7 @@ class NetworkScanner {
         let components = localIPAddress.split(separator: ".")
         guard components.count == 4 else { return [] }
 
-        if interface == "utun0" || interface == "utun1" {
+        if interface == "utun0" || interface == "utun1" || interface == "utun2" || interface == "utun3" {
             let subnetBase = components[0...1].joined(separator: ".")
             return (0...255).flatMap { firstOctet in
                 (0...255).map { secondOctet in
