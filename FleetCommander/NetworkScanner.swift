@@ -127,7 +127,7 @@ class NetworkScanner {
             let subnetBase = components[0...1].joined(separator: ".")
             return (0..<1024).map { offset in
                 let thirdOctet = (offset / 4) % 256
-                let fourthOctet = (offset % 4) * 64
+                let fourthOctet = (offset % 256)
                 return "\(subnetBase).\(thirdOctet).\(fourthOctet)"
             }
         } else {
