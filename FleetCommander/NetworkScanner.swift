@@ -79,6 +79,7 @@ class NetworkScanner {
             var ptr = ifaddr
             while ptr != nil {
                 let interfaceName = String(cString: (ptr?.pointee.ifa_name)!)
+                logMessage("Interface detected: \(interfaceName)")
                 if let addr = ptr?.pointee.ifa_addr, addr.pointee.sa_family == UInt8(AF_INET) {
                     if interfaceName == interface {
                         var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
