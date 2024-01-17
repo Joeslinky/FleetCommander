@@ -64,9 +64,8 @@ class NetworkScanner {
     /// - Returns: A Boolean indicating if the interface is valid.
     private func isValidInterface(_ interface: ifaddrs) -> Bool {
         let interfaceName = String(cString: interface.ifa_name)
-        return true
-        //return (interface.ifa_addr.pointee.sa_family == UInt8(AF_INET)) &&
-        //(interfaceName == "en0" || interfaceName == "bridge100" || interfaceName == "utun0" || interfaceName == "utun1")
+        return (interface.ifa_addr.pointee.sa_family == UInt8(AF_INET)) &&
+        (interfaceName == "en0" || interfaceName == "bridge100" || interfaceName == "utun0" || interfaceName == "utun1" || interfaceName == "utun2" || interfaceName == "utun3")
     }
     
     /// Retrieves the IP address for a given network interface.
@@ -80,7 +79,7 @@ class NetworkScanner {
             var ptr = ifaddr
             while ptr != nil {
                 let interfaceName = String(cString: (ptr?.pointee.ifa_name)!)
-                logMessage("Interface detected: \(interfaceName)")
+                self.logMessage("Interface detected: \(interfaceName)")
 
                 if let flags = ptr?.pointee.ifa_flags, let addr = ptr?.pointee.ifa_addr, Int32(flags) & (IFF_UP | IFF_RUNNING) != 0 {
                     if addr.pointee.sa_family == UInt8(AF_INET) {
