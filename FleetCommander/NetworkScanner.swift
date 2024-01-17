@@ -56,6 +56,7 @@ class NetworkScanner {
             }
         }
         return Array(Set(interfaces)) // Remove duplicates
+        self.logMessage("\(interfaces)")
     }
     
     /// Checks if the network interface is valid for scanning.
