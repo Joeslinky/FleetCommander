@@ -99,7 +99,6 @@ class NetworkScanner {
     }
 
     /// Initiates a scan of the networks based on active interfaces.
-    /// Initiates a scan of all active network interfaces.
     private func scanNetworks() {
         let interfaces = getActiveNetworkInterfaces()
         if interfaces.isEmpty {
@@ -108,11 +107,12 @@ class NetworkScanner {
         }
 
         for interface in interfaces {
-            let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
-            scanSubnetForService(ipRange: ipRange, interface: interface)
+            if let localIP = getIPAddress(for: interface) { // Get local IP for each interface
+                let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
+                scanSubnetForService(ipRange: ipRange)
+            }
         }
     }
-
     
     /// Calculates the subnet range based on the given local IP address.
     /// - Parameters:
