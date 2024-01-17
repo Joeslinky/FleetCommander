@@ -74,24 +74,19 @@ class NetworkScanner {
     private func getIPAddress(for interface: String) -> String? {
         var address: String?
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-            
+
         if getifaddrs(&ifaddr) == 0 {
             var ptr = ifaddr
             while ptr != nil {
                 let interfaceName = String(cString: (ptr?.pointee.ifa_name)!)
-                let addrFamily = ptr?.pointee.ifa_addr.pointee.sa_family
-                logMessage("Interface: \(interfaceName), Family: \(String(describing: addrFamily))")
-
-                if let flags = ptr?.pointee.ifa_flags, let addr = ptr?.pointee.ifa_addr, Int32(flags) & (IFF_UP | IFF_RUNNING) != 0 {
-                    if addr.pointee.sa_family == UInt8(AF_INET) || addr.pointee.sa_family == UInt8(AF_INET6) {
-                        if interfaceName == interface {
-                            var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                            getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
-                            address = String(cString: hostname)
-                            logMessage("IP Address for interface \(interface): \(address ?? "nil")")
-                            delegate?.updateLogView()
-                            break
-                        }
+                if let addr = ptr?.pointee.ifa_addr, addr.pointee.sa_family == UInt8(AF_INET) {
+                    if interfaceName == interface {
+                        var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                        getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
+                        address = String(cString: hostname)
+                        logMessage("IPv4 Address for interface \(interface): \(address ?? "nil")")
+                        delegate?.updateLogView()
+                        break
                     }
                 }
                 ptr = ptr?.pointee.ifa_next
