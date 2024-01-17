@@ -128,7 +128,7 @@ class NetworkScanner {
                 return "\(firstOctet).\(secondOctet + thirdOctet).\(fourthOctet).\(fifthOctet)"
             }
         } else {
-            let subnetBase = components.dropLast().joined(separator: ".")
+            let subnetBase = components.dropLast().map { String($0) }.joined(separator: ".")
             return (1...254).map { "\(subnetBase).\($0)" }
         }
     }
