@@ -55,7 +55,7 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        self.logMessage("Active network interfaces: \(interfaces)")
+        self.logMessage("Active network interfaces: \(Array(Set(interfaces)))")
         return Array(Set(interfaces))
     }
     
@@ -89,8 +89,7 @@ class NetworkScanner {
                             if let addr = ptr?.pointee.ifa_addr {
                                 getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
                                 address = String(cString: hostname)
-                                print("IP Address for interface \(interface): \(address ?? "nil")")
-                                delegate?.appendLogMessage("IP Address for interface \(interface): \(address ?? "nil")")
+                                logMessage("IP Address for interface \(interface): \(address ?? "nil")")
                                 delegate?.updateLogView()
                             }
                             break
@@ -179,23 +178,20 @@ class NetworkScanner {
             completion(false)
             return
         }
-        print("Pinging \(ipAddress)...")
-        delegate?.appendLogMessage("Pinging \(ipAddress)...")
+        logMessage("Pinging \(ipAddress)...")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 10
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
-                print("Device found at \(ipAddress)")
-                self.delegate?.appendLogMessage("Device found at \(ipAddress)")
+                self.logMessage("Device found at \(ipAddress)")
                 self.delegate?.loadWebPage(with: ipAddress)
                 self.isDeviceFound = true
             } else {
                 completion(false)
                 if !self.isDeviceFound {
-                    print("Failed to connect to \(ipAddress)")
-                    self.delegate?.appendLogMessage("Failed to connect to \(ipAddress)")
+                    self.logMessage("Failed to connect to \(ipAddress)")
                 }
             }
         }
