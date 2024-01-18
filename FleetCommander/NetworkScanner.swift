@@ -13,6 +13,7 @@ class NetworkScanner {
     let batchSize = 20
     var currentBatchStartIndex = 0
     var accumulatedLogMessages: [String] = []
+    var logMessage = ""
     let logBatchSize = 100
     
     /// Starts the network scanning process.
