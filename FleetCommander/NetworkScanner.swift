@@ -133,9 +133,9 @@ class NetworkScanner {
 
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
-    private func scanSubnetForService(ipRange: [String]) {
+    private func scanSubnetForService(ipRange: [String], completion: @escaping () -> Void) {
         guard !ipRange.isEmpty && isScanning else {
-            completeScan()
+            completion()
             return
         }
         self.isDeviceFound = false
@@ -146,7 +146,10 @@ class NetworkScanner {
                         self.isDeviceFound = true
                         self.isScanning = false
                         self.delegate?.loadWebPage(with: ipAddress)
+                        completion()
                         return
+                    } else if ipAddress == ipRange.last {
+                        completion()
                     }
                 }
             }
