@@ -10,6 +10,10 @@ class NetworkScanner {
     var isSearchTimedOut = false
     var isScanning = false
     var isDeviceFound = false
+    let batchSize = 20
+    var currentBatchStartIndex = 0
+    var accumulatedLogMessages: [String] = []
+    let logBatchSize = 100
     
     /// Starts the network scanning process.
     func startNetworkScan() {
@@ -25,7 +29,8 @@ class NetworkScanner {
             if !self.isDeviceFound && self.isScanning {
                 self.isSearchTimedOut = true
                 self.delegate?.showRetryButton()
-                self.logMessage("No devices found")
+                self.logMessage += "No devices found"
+                self.logBatchMessages()
             }
         }
     }
@@ -80,7 +85,7 @@ class NetworkScanner {
                             var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                             getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
                             address = String(cString: hostname)
-                            logMessage("IP Address for interface \(interface): \(address ?? "nil")")
+                            logMessage = "IP Address for interface \(interface): \(address ?? "nil")"
                             delegate?.updateLogView()
                             break
                         }
@@ -140,13 +145,23 @@ class NetworkScanner {
             completeScan()
             return
         }
-        for ipAddress in ipRange {
+        let batchEndIndex = min(currentBatchStartIndex + batchSize, ipRange.count)
+        let currentBatch = Array(ipRange[currentBatchStartIndex..<batchEndIndex])
+        for ipAddress in currentBatch {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
                     if success {
                         self.isDeviceFound = true
                         self.isScanning = false
                         self.delegate?.loadWebPage(with: ipAddress)
+                    } else if ipAddress == currentBatch.last {
+                        // Move to the next batch
+                        self.currentBatchStartIndex += self.batchSize
+                        if self.currentBatchStartIndex < ipRange.count {
+                            self.scanSubnetForService(ipRange: ipRange)
+                        } else {
+                            self.completeScan()
+                        }
                     }
                 }
             }
@@ -163,32 +178,39 @@ class NetworkScanner {
             completion(false)
             return
         }
-        logMessage("Pinging \(ipAddress)...")
+        logMessage += ("Pinging \(ipAddress)...")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 10
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
-                self.logMessage("Device found at \(ipAddress)")
+                self.logMessage += "Device found at \(ipAddress)"
                 self.delegate?.loadWebPage(with: ipAddress)
                 self.isDeviceFound = true
             } else {
                 completion(false)
                 if !self.isDeviceFound {
-                    self.logMessage("Failed to connect to \(ipAddress)")
+                    self.logMessage += "Failed to connect to \(ipAddress)"
                 }
             }
         }
         task.resume()
     }
     
-    /// Logs a message and updates the delegate.
-    /// - Parameter message: The message to log.
-    private func logMessage(_ message: String) {
-        print(message)
-        delegate?.appendLogMessage(message)
+    private func accumulateLogMessage(_ message: String) {
+        accumulatedLogMessages.append(message)
+        if accumulatedLogMessages.count >= logBatchSize || (isScanning == false && isDeviceFound == false) {
+            logBatchMessages()
+        }
+    }
+    
+    private func logBatchMessages() {
+        let batchedMessage = accumulatedLogMessages.joined(separator: "\n")
+        print(batchedMessage)
+        delegate?.appendLogMessage(batchedMessage)
         delegate?.updateLogView()
+        accumulatedLogMessages.removeAll()
     }
 }
 
