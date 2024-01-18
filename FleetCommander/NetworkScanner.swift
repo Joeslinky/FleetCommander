@@ -56,7 +56,6 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        self.logMessage("Active network interfaces: \(interfaces)")
         return Array(Set(interfaces))
     }
     
@@ -112,9 +111,7 @@ class NetworkScanner {
                 scanSubnetForService(ipRange: ipRange) {
                     self.pendingScanOperations -= 1
                     if self.pendingScanOperations == 0 {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-                            self.completeScan()
-                        }
+                        self.completeScan()
                     }
                 }
             }
@@ -170,7 +167,7 @@ class NetworkScanner {
         delegate?.appendLogMessage("Pinging \(ipAddress)...")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.timeoutInterval = 5
+        request.timeoutInterval = 10
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
