@@ -10,11 +10,7 @@ class NetworkScanner {
     var isSearchTimedOut = false
     var isScanning = false
     var isDeviceFound = false
-    let batchSize = 20
-    var currentBatchStartIndex = 0
-    var accumulatedLogMessages: [String] = []
-    var logMessage = ""
-    let logBatchSize = 100
+    var pendingScanOperations = 0
     
     /// Starts the network scanning process.
     func startNetworkScan() {
@@ -30,8 +26,7 @@ class NetworkScanner {
             if !self.isDeviceFound && self.isScanning {
                 self.isSearchTimedOut = true
                 self.delegate?.showRetryButton()
-                self.logMessage += "No devices found"
-                self.logBatchMessages()
+                self.logMessage("No devices found")
             }
         }
     }
@@ -48,8 +43,11 @@ class NetworkScanner {
     private func getActiveNetworkInterfaces() -> [String] {
         var interfaces = [String]()
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        
+        // Get the list of network interfaces.
         if getifaddrs(&ifaddr) == 0 {
             defer { freeifaddrs(ifaddr) }
+            
             var ptr = ifaddr
             while ptr != nil {
                 if let interface = ptr?.pointee, isValidInterface(interface) {
@@ -58,6 +56,7 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
+        self.logMessage("Active network interfaces: \(interfaces)")
         return Array(Set(interfaces))
     }
     
@@ -86,7 +85,7 @@ class NetworkScanner {
                             var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                             getnameinfo(addr, socklen_t(addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
                             address = String(cString: hostname)
-                            logMessage = "IP Address for interface \(interface): \(address ?? "nil")"
+                            logMessage("IP Address for interface \(interface): \(address ?? "nil")")
                             delegate?.updateLogView()
                             break
                         }
@@ -98,7 +97,7 @@ class NetworkScanner {
         }
         return address
     }
-
+    
     /// Initiates a scan of the networks based on active interfaces.
     private func scanNetworks() {
         let interfaces = getActiveNetworkInterfaces()
@@ -109,60 +108,45 @@ class NetworkScanner {
         for interface in interfaces {
             if let localIP = getIPAddress(for: interface) { // Get local IP for each interface
                 let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
-                scanSubnetForService(ipRange: ipRange)
+                pendingScanOperations += 1
+                scanSubnetForService(ipRange: ipRange) {
+                    self.pendingScanOperations -= 1
+                    if self.pendingScanOperations == 0 {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                            self.completeScan()
+                        }
+                    }
+                }
             }
         }
-        //completeScan()
     }
     
     /// Calculates the subnet range based on the given local IP address.
-    /// - Parameters:
-    ///   - localIPAddress: The local IP address.
-    ///   - interface: The network interface.
+    /// - Parameter localIPAddress: The local IP address.
     /// - Returns: An array of IP addresses in the subnet.
     private func calculateSubnetRange(from localIPAddress: String, forInterface interface: String) -> [String] {
-        let components = localIPAddress.split(separator: ".").compactMap { Int($0) }
+        let components = localIPAddress.split(separator: ".")
         guard components.count == 4 else { return [] }
-        if interface.hasPrefix("utun") {
-            let networkPart = (components[0] << 2) | (components[1] >> 6)
-            let firstOctet = networkPart >> 2
-            let secondOctet = (networkPart & 0b11) << 6
-            return (0..<(1 << 22)).map { offset in
-                let thirdOctet = (offset >> 16) & 0xFF
-                let fourthOctet = (offset >> 8) & 0xFF
-                let fifthOctet = offset & 0xFF
-                return "\(firstOctet).\(secondOctet + thirdOctet).\(fourthOctet).\(fifthOctet)"
-            }
-        } else {
-            let subnetBase = components.dropLast().map { String($0) }.joined(separator: ".")
-            return (1...254).map { "\(subnetBase).\($0)" }
-        }
+        let subnetBase = components.dropLast().joined(separator: ".")
+        return (1...254).map { "\(subnetBase).\($0)" }
     }
 
     /// Scans a given subnet for a specific service.
     /// - Parameter ipRange: The IP range of the subnet to scan.
     private func scanSubnetForService(ipRange: [String]) {
-        guard !ipRange.isEmpty && isScanning && !isDeviceFound else {
+        guard !ipRange.isEmpty && isScanning else {
             completeScan()
             return
         }
-        let batchEndIndex = min(currentBatchStartIndex + batchSize, ipRange.count)
-        let currentBatch = Array(ipRange[currentBatchStartIndex..<batchEndIndex])
-        for ipAddress in currentBatch {
+        self.isDeviceFound = false
+        for ipAddress in ipRange where !isDeviceFound {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.attemptConnection(ipAddress: ipAddress, port: 8082) { success in
                     if success {
                         self.isDeviceFound = true
                         self.isScanning = false
                         self.delegate?.loadWebPage(with: ipAddress)
-                    } else if ipAddress == currentBatch.last {
-                        // Move to the next batch
-                        self.currentBatchStartIndex += self.batchSize
-                        if self.currentBatchStartIndex < ipRange.count {
-                            self.scanSubnetForService(ipRange: ipRange)
-                        } else {
-                            self.completeScan()
-                        }
+                        return
                     }
                 }
             }
@@ -179,39 +163,35 @@ class NetworkScanner {
             completion(false)
             return
         }
-        logMessage += ("Pinging \(ipAddress)...")
+        print("Pinging \(ipAddress)...")
+        delegate?.appendLogMessage("Pinging \(ipAddress)...")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.timeoutInterval = 10
+        request.timeoutInterval = 5
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
-                self.logMessage += "Device found at \(ipAddress)"
+                print("Device found at \(ipAddress)")
+                self.delegate?.appendLogMessage("Device found at \(ipAddress)")
                 self.delegate?.loadWebPage(with: ipAddress)
                 self.isDeviceFound = true
             } else {
                 completion(false)
                 if !self.isDeviceFound {
-                    self.logMessage += "Failed to connect to \(ipAddress)"
+                    print("Failed to connect to \(ipAddress)")
+                    self.delegate?.appendLogMessage("Failed to connect to \(ipAddress)")
                 }
             }
         }
         task.resume()
     }
     
-    private func accumulateLogMessage(_ message: String) {
-        accumulatedLogMessages.append(message)
-        if accumulatedLogMessages.count >= logBatchSize || (isScanning == false && isDeviceFound == false) {
-            logBatchMessages()
-        }
-    }
-    
-    private func logBatchMessages() {
-        let batchedMessage = accumulatedLogMessages.joined(separator: "\n")
-        print(batchedMessage)
-        delegate?.appendLogMessage(batchedMessage)
+    /// Logs a message and updates the delegate.
+    /// - Parameter message: The message to log.
+    private func logMessage(_ message: String) {
+        print(message)
+        delegate?.appendLogMessage(message)
         delegate?.updateLogView()
-        accumulatedLogMessages.removeAll()
     }
 }
 
