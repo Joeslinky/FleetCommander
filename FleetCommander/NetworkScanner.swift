@@ -105,7 +105,7 @@ class NetworkScanner {
             return
         }
         for interface in interfaces {
-            if let localIP = getIPAddress(for: interface) { // Get local IP for each interface
+            if let localIP = getIPAddress(for: interface) {
                 let ipRange = calculateSubnetRange(from: localIP, forInterface: interface)
                 pendingScanOperations += 1
                 scanSubnetForService(ipRange: ipRange) {
@@ -163,23 +163,20 @@ class NetworkScanner {
             completion(false)
             return
         }
-        print("Pinging \(ipAddress)...")
-        delegate?.appendLogMessage("Pinging \(ipAddress)...")
+        logMessage("Pinging \(ipAddress)...")
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = 10
         let task = URLSession.shared.dataTask(with: request) { _, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
-                print("Device found at \(ipAddress)")
-                self.delegate?.appendLogMessage("Device found at \(ipAddress)")
+                self.logMessage("Device found at \(ipAddress)")
                 self.delegate?.loadWebPage(with: ipAddress)
                 self.isDeviceFound = true
             } else {
                 completion(false)
                 if !self.isDeviceFound {
-                    print("Failed to connect to \(ipAddress)")
-                    self.delegate?.appendLogMessage("Failed to connect to \(ipAddress)")
+                    self.logMessage("Failed to connect to \(ipAddress)")
                 }
             }
         }
