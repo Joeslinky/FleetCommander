@@ -255,7 +255,7 @@ extension ViewController: WKNavigationDelegate {
             return
         }
         print("URL clicked: \(url)")
-        if url.absoluteString.contains("/full/") && url.absoluteString.contains("8082") {
+        if url.absoluteString.contains("/full/") || url.absoluteString.contains("/download/") {
             print("Download link detected, initiating download...")
             downloadAndSaveVideo(url: url)
             decisionHandler(.cancel)
