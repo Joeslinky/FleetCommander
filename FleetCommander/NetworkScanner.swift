@@ -43,20 +43,23 @@ class NetworkScanner {
     private func getActiveNetworkInterfaces() -> [String] {
         var interfaces = [String]()
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        
+    
         // Get the list of network interfaces.
-        if getifaddrs(&ifaddr) == 0 {
-            defer { freeifaddrs(ifaddr) }
-            
-            var ptr = ifaddr
-            while ptr != nil {
-                if let interface = ptr?.pointee, isValidInterface(interface) {
-                    interfaces.append(String(cString: interface.ifa_name))
+            if getifaddrs(&ifaddr) == 0 {
+                defer { freeifaddrs(ifaddr) }
+        
+                var ptr = ifaddr
+                while ptr != nil {
+                    if let interface = ptr?.pointee, isValidInterface(interface) {
+                        interfaces.append(String(cString: interface.ifa_name))
+                    }
+                    ptr = ptr?.pointee.ifa_next
                 }
-                ptr = ptr?.pointee.ifa_next
             }
-        }
-        return Array(Set(interfaces))
+    
+        let interfaceArray = Array(Set(interfaces))
+    
+        return interfaceArray
     }
     
     /// Checks if the network interface is valid for scanning.
@@ -64,10 +67,11 @@ class NetworkScanner {
     /// - Returns: A Boolean indicating if the interface is valid.
     private func isValidInterface(_ interface: ifaddrs) -> Bool {
         let interfaceName = String(cString: interface.ifa_name)
-        return (interface.ifa_addr.pointee.sa_family == UInt8(AF_INET)) &&
-        (interfaceName == "en0" || interfaceName == "bridge100" || interfaceName == "utun0" || interfaceName == "utun1" || interfaceName == "utun2" || interfaceName == "utun3")
+        let validInterfaceNames = ["en0", "bridge100", "utun0", "utun1", "utun2", "utun3", "utun4"]
+        return interface.ifa_addr.pointee.sa_family == UInt8(AF_INET) && validInterfaceNames.contains(interfaceName)
     }
-    
+
+
     /// Retrieves the IP address for a given network interface.
     /// - Parameter interface: The name of the network interface.
     /// - Returns: The IP address as a string, or nil if not found.
