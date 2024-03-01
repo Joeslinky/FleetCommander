@@ -56,7 +56,9 @@ class NetworkScanner {
                 ptr = ptr?.pointee.ifa_next
             }
         }
-        return Array(Set(interfaces))
+        let interfaceArray = Array(Set(interfaces))
+        logMessage("\(interfaceArray)")
+        return interfaceArray
     }
     
     /// Checks if the network interface is valid for scanning.
