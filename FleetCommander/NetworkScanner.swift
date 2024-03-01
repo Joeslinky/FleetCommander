@@ -43,23 +43,25 @@ class NetworkScanner {
     private func getActiveNetworkInterfaces() -> [String] {
         var interfaces = [String]()
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        
+    
         // Get the list of network interfaces.
         if getifaddrs(&ifaddr) == 0 {
             defer { freeifaddrs(ifaddr) }
-            
+        
             var ptr = ifaddr
             while ptr != nil {
-                if let interface = ptr?.pointee, isValidInterface(interface) {
+                logMessage("\(interfaces)")
+                if let interface = ptr?.pointee {
                     interfaces.append(String(cString: interface.ifa_name))
                 }
                 ptr = ptr?.pointee.ifa_next
             }
         }
+    
         let interfaceArray = Array(Set(interfaces))
-        logMessage("\(interfaceArray)")
         return interfaceArray
     }
+
     
     /// Checks if the network interface is valid for scanning.
     /// - Parameter interface: A network interface.
