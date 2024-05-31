@@ -33,3 +33,5 @@ Contributions to FleetCommander are welcome!
 ## License
 
 FleetCommander is released under the [MIT License](LICENSE.txt).
+
+Last Updated: 05/30/2024
