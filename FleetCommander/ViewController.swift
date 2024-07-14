@@ -74,6 +74,8 @@ class ViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         webView.scrollView.delegate = self
+        
+        self.view.setUserInteraction(enabled: true)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -686,5 +688,13 @@ extension ViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         manualIPButtonTapped()
         return true
+    }
+}
+extension UIView {
+    func setUserInteraction(enabled: Bool) {
+        self.isUserInteractionEnabled = enabled
+        for subview in subviews {
+            subview.setUserInteraction(enabled: enabled)
+        }
     }
 }
