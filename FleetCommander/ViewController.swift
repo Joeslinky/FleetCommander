@@ -111,13 +111,13 @@ class ViewController: UIViewController {
     
         autodiscoveryButton = UIButton(type: .system)
         configureButton(autodiscoveryButton, "Auto-Discovery")
-        autodiscoveryButton.addTarget(self, selector: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
+        autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(autodiscoveryButton)
     
         manualEntryButton = UIButton(type: .system)
         configureButton(manualEntryButton, "Manual IP Entry")
-        manualEntryButton.addTarget(self, selector: #selector(showManualIPEntry), for: .touchUpInside)
+        manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(manualEntryButton)
     
@@ -131,7 +131,7 @@ class ViewController: UIViewController {
     
         manualIPButton = UIButton(type: .system)
         configureButton(manualIPButton, "Connect")
-        manualIPButton.addTarget(self, selector: #selector(manualIPButtonTapped), for: .touchUpInside)
+        manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
         manualIPButton.translatesAutoresizingMaskIntoConstraints = false
         manualIPButton.isHidden = true
         initialOptionsView.addSubview(manualIPButton)
@@ -175,6 +175,9 @@ class ViewController: UIViewController {
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
+
+        view.bringSubviewToFront(autodiscoveryButton)
+        view.bringSubviewToFront(manualEntryButton)
     
         initialOptionsView.isHidden = false
     }
@@ -185,6 +188,8 @@ class ViewController: UIViewController {
         rememberIPSwitch.isHidden = false
         rememberIPLabel.isHidden = false
         autodiscoveryButton.isHidden = true
+        view.bringSubviewToFront(manualIPTextField)
+        view.bringSubviewToFront(rememberIPSwitch)
     }
 
     private func setupForgetIPButton() {
@@ -282,6 +287,7 @@ class ViewController: UIViewController {
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
+        view.bringSubviewToFront(logTextView)
         
         DispatchQueue.global(qos: .background).async {
             self.networkScanner.startNetworkScan()
@@ -476,6 +482,7 @@ class ViewController: UIViewController {
             self.refreshButton.isHidden = false
             self.ipLabel.isHidden = false
             self.retryButton.isHidden = true
+            view.bringSubviewToFront(self.refreshButton)
         }
     }
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!) {
@@ -483,6 +490,7 @@ class ViewController: UIViewController {
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
             self.retryButton.isHidden = false
+            view.bringSubviewToFront(self.retryButton)
         }
     }
 }
@@ -628,6 +636,7 @@ extension ViewController: NetworkScannerDelegate {
             self.retryButton.isHidden = false
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
+            view.bringSubviewToFront(self.retryButton)
         }
     }
     
