@@ -10,7 +10,6 @@ import Network
 import SystemConfiguration
 import Photos
 class ViewController: UIViewController {
-    // Properties
     var webView: WKWebView!
     var networkScanner: NetworkScanner!
     var spinner: UIActivityIndicatorView!
@@ -24,6 +23,11 @@ class ViewController: UIViewController {
     var downloadAlert: UIAlertController?
     var downloadTask: URLSessionDownloadTask?
     var downloadProgressLabel: UILabel?
+    var manualIPTextField: UITextField!
+    var manualIPButton: UIButton!
+    var autodiscoveryButton: UIButton!
+    var rememberIPSwitch: UISwitch!
+    var initialOptionsView: UIView!
     override func viewDidLoad() {
         super.viewDidLoad()
         networkScanner = NetworkScanner()
@@ -36,9 +40,8 @@ class ViewController: UIViewController {
         setupRetryButton()
         setupLogTextView()
         startLogUpdateTimer()
-        DispatchQueue.global(qos: .background).async {
-            self.networkScanner.startNetworkScan()
-        }
+        setupInitialOptionsView()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
@@ -60,6 +63,132 @@ class ViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         webView.scrollView.delegate = self
+        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
+            connectToIP(savedIP)
+        } else {
+            showInitialOptions()
+        }
+    }
+    private func setupInitialOptionsView() {
+        initialOptionsView = UIView()
+        initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(initialOptionsView)
+        
+        manualIPTextField = UITextField()
+        manualIPTextField.placeholder = "Enter IP Address"
+        manualIPTextField.borderStyle = .roundedRect
+        manualIPTextField.translatesAutoresizingMaskIntoConstraints = false
+        initialOptionsView.addSubview(manualIPTextField)
+        
+        manualIPButton = UIButton(type: .system)
+        manualIPButton.setTitle("Connect", for: .normal)
+        manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
+        manualIPButton.translatesAutoresizingMaskIntoConstraints = false
+        initialOptionsView.addSubview(manualIPButton)
+        
+        autodiscoveryButton = UIButton(type: .system)
+        autodiscoveryButton.setTitle("Use Autodiscovery", for: .normal)
+        autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
+        autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
+        initialOptionsView.addSubview(autodiscoveryButton)
+        
+        rememberIPSwitch = UISwitch()
+        rememberIPSwitch.translatesAutoresizingMaskIntoConstraints = false
+        initialOptionsView.addSubview(rememberIPSwitch)
+        
+        let rememberIPLabel = UILabel()
+        rememberIPLabel.text = "Remember IP"
+        rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
+        initialOptionsView.addSubview(rememberIPLabel)
+        
+        NSLayoutConstraint.activate([
+            initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            
+            manualIPTextField.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
+            manualIPTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+            manualIPTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
+            
+            manualIPButton.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
+            manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+            
+            rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
+            rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+            
+            rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
+            rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10),
+            
+            autodiscoveryButton.topAnchor.constraint(equalTo: rememberIPSwitch.bottomAnchor, constant: 20),
+            autodiscoveryButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+            autodiscoveryButton.bottomAnchor.constraint(equalTo: initialOptionsView.bottomAnchor)
+        ])
+        
+        initialOptionsView.isHidden = true
+    }
+    
+    private func showInitialOptions() {
+        initialOptionsView.isHidden = false
+        webView.isHidden = true
+        // Hide other UI elements
+        spinner.isHidden = true
+        statusLabel.isHidden = true
+        refreshButton.isHidden = true
+        ipLabel.isHidden = true
+        retryButton.isHidden = true
+        logTextView.isHidden = true
+    }
+    
+    @objc func manualIPButtonTapped() {
+        guard let ipAddress = manualIPTextField.text, !ipAddress.isEmpty else {
+            showAlert(title: "Error", message: "Please enter an IP address.")
+            return
+        }
+        
+        if !isValidIPAddress(ipAddress) {
+            showAlert(title: "Invalid IP", message: "Please enter a valid IP address.")
+            return
+        }
+        
+        if rememberIPSwitch.isOn {
+            UserDefaults.standard.set(ipAddress, forKey: "SavedIPAddress")
+        }
+        
+        connectToIP(ipAddress)
+    }
+    
+    func isValidIPAddress(_ ipAddress: String) -> Bool {
+        let ipAddressRegex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        let ipPredicate = NSPredicate(format: "SELF MATCHES %@", ipAddressRegex)
+        return ipPredicate.evaluate(with: ipAddress)
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func autodiscoveryButtonTapped() {
+        initialOptionsView.isHidden = true
+        webView.isHidden = false
+        spinner.isHidden = false
+        statusLabel.isHidden = false
+        logTextView.isHidden = false
+        
+        DispatchQueue.global(qos: .background).async {
+            self.networkScanner.startNetworkScan()
+        }
+    }
+    
+    private func connectToIP(_ ipAddress: String) {
+        initialOptionsView.isHidden = true
+        webView.isHidden = false
+        spinner.isHidden = false
+        statusLabel.isHidden = false
+        logTextView.isHidden = false
+        
+        loadWebPage(with: ipAddress)
     }
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
@@ -77,7 +206,7 @@ class ViewController: UIViewController {
             } else {
                 self.spinner.color = .black
             }
-            self.spinner.isHidden = false
+            self.spinner.isHidden = true
             self.spinner.center = self.view.center
             self.view.addSubview(self.spinner)
             self.spinner.startAnimating()
@@ -88,6 +217,7 @@ class ViewController: UIViewController {
             self.statusLabel = UILabel()
             self.statusLabel.translatesAutoresizingMaskIntoConstraints = false
             self.statusLabel.textAlignment = .center
+            self.statusLabel.isHidden = true
             if self.traitCollection.userInterfaceStyle == .dark {
                 self.statusLabel.textColor = .white
             } else {
@@ -173,6 +303,7 @@ class ViewController: UIViewController {
             self.logTextView.translatesAutoresizingMaskIntoConstraints = false
             self.logTextView.isEditable = false
             self.logTextView.isSelectable = false
+            self.logTextView.isHidden = true
             if self.traitCollection.userInterfaceStyle == .dark {
                 self.logTextView.backgroundColor = UIColor.black
                 self.logTextView.textColor = UIColor.white
