@@ -101,13 +101,13 @@ class ViewController: UIViewController {
             button.backgroundColor = .systemBlue
             button.setTitleColor(.white, for: .normal)
             button.layer.cornerRadius = 15
-            button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
             button.clipsToBounds = true
         }
         
         autodiscoveryButton = UIButton(type: .system)
-        autodiscoveryButton.setTitle("Use Autodiscovery", for: .normal)
+        autodiscoveryButton.setTitle("Use Auto-Discovery", for: .normal)
         autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
+        autodiscoveryButton.isUserInteractionEnabled = true
         styleButton(autodiscoveryButton)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(autodiscoveryButton)
@@ -115,6 +115,7 @@ class ViewController: UIViewController {
         let manualEntryButton = UIButton(type: .system)
         manualEntryButton.setTitle("Manual IP Entry", for: .normal)
         manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
+        manualEntryButton.isUserInteractionEnabled = true
         styleButton(manualEntryButton)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(manualEntryButton)
@@ -123,6 +124,7 @@ class ViewController: UIViewController {
         manualIPTextField.placeholder = "Enter IP Address"
         manualIPTextField.borderStyle = .roundedRect
         manualIPTextField.translatesAutoresizingMaskIntoConstraints = false
+        manualIPTextField.isUserInteractionEnabled = true
         manualIPTextField.isHidden = true
         manualIPTextField.delegate = self
         initialOptionsView.addSubview(manualIPTextField)
@@ -130,6 +132,7 @@ class ViewController: UIViewController {
         manualIPButton = UIButton(type: .system)
         manualIPButton.setTitle("Connect", for: .normal)
         manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
+        manualIPButton.isUserInteractionEnabled = true
         styleButton(manualIPButton)
         manualIPButton.translatesAutoresizingMaskIntoConstraints = false
         manualIPButton.isHidden = true
@@ -138,6 +141,7 @@ class ViewController: UIViewController {
         rememberIPSwitch = UISwitch()
         rememberIPSwitch.translatesAutoresizingMaskIntoConstraints = false
         rememberIPSwitch.isHidden = true
+        rememberIPSwitch.isUserInteractionEnabled = true
         initialOptionsView.addSubview(rememberIPSwitch)
         
         rememberIPLabel = UILabel()
