@@ -30,7 +30,6 @@ class ViewController: UIViewController {
     var rememberIPSwitch: UISwitch!
     var initialOptionsView: UIView!
     var forgetIPButton: UIButton!
-    var savedIPLabel: UILabel!
     var rememberIPLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +42,6 @@ class ViewController: UIViewController {
         setupRetryButton()
         setupLogTextView()
         setupForgetIPButton()
-        setupSavedIPLabel()
         
         networkScanner = NetworkScanner()
         networkScanner.viewController = self
@@ -90,6 +88,7 @@ class ViewController: UIViewController {
         initialOptionsView.isUserInteractionEnabled = true
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
+        view.bringSubviewToFront(initialOptionsView)
     
         let choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
@@ -205,19 +204,6 @@ class ViewController: UIViewController {
         forgetIPButton.isHidden = true
     }
 
-    private func setupSavedIPLabel() {
-        savedIPLabel = UILabel()
-        savedIPLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(savedIPLabel)
-
-        NSLayoutConstraint.activate([
-            savedIPLabel.topAnchor.constraint(equalTo: forgetIPButton.bottomAnchor, constant: 10),
-            savedIPLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
-        
-        savedIPLabel.isHidden = true
-    }
-
     @objc func forgetIPButtonTapped() {
         UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
         showInitialOptions()
@@ -233,15 +219,10 @@ class ViewController: UIViewController {
         retryButton.isHidden = true
         logTextView.isHidden = true
         forgetIPButton.isHidden = true
-        savedIPLabel.isHidden = true
         
         autodiscoveryButton.isHidden = false
-        
-        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
-            savedIPLabel.text = "Saved IP: \(savedIP)"
-            savedIPLabel.isHidden = false
-            forgetIPButton.isHidden = false
-        }
+        manualEntryButton.isHidden = false
+        choiceLabel.isHidden = false
     }
     
     @objc func manualIPButtonTapped() {
