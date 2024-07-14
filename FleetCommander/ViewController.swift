@@ -49,8 +49,6 @@ class ViewController: UIViewController {
         networkScanner.viewController = self
         networkScanner.delegate = self
         manualIPTextField.delegate = self
-
-        initialOptionsView.isUserInteractionEnabled = true
         
         startLogUpdateTimer()
         
@@ -89,6 +87,7 @@ class ViewController: UIViewController {
     }
     private func setupInitialOptionsView() {
         initialOptionsView = UIView()
+        initialOptionsView.isUserInteractionEnabled = true
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
     
@@ -96,6 +95,7 @@ class ViewController: UIViewController {
         choiceLabel.text = "Choose connection method:"
         choiceLabel.textColor = .black
         choiceLabel.translatesAutoresizingMaskIntoConstraints = false
+        choiceLabel.isHidden = true
         initialOptionsView.addSubview(choiceLabel)
     
         let configureButton: (UIButton, String) -> Void = { button, title in
@@ -114,12 +114,14 @@ class ViewController: UIViewController {
         configureButton(autodiscoveryButton, "Auto-Discovery")
         autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
+        autodiscoveryButton.isHidden = true
         initialOptionsView.addSubview(autodiscoveryButton)
     
         manualEntryButton = UIButton(type: .system)
         configureButton(manualEntryButton, "Manual IP Entry")
         manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
+        manualEntryButton.isHidden = true
         initialOptionsView.addSubview(manualEntryButton)
     
         manualIPTextField = UITextField()
@@ -176,11 +178,8 @@ class ViewController: UIViewController {
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
-
-        view.bringSubviewToFront(autodiscoveryButton)
-        view.bringSubviewToFront(manualEntryButton)
     
-        initialOptionsView.isHidden = false
+        initialOptionsView.isHidden = true
     }
     
     @objc func showManualIPEntry() {
@@ -189,8 +188,6 @@ class ViewController: UIViewController {
         rememberIPSwitch.isHidden = false
         rememberIPLabel.isHidden = false
         autodiscoveryButton.isHidden = true
-        view.bringSubviewToFront(manualIPTextField)
-        view.bringSubviewToFront(rememberIPSwitch)
     }
 
     private func setupForgetIPButton() {
@@ -240,11 +237,6 @@ class ViewController: UIViewController {
         
         autodiscoveryButton.isHidden = false
         
-        manualIPTextField.isHidden = true
-        manualIPButton.isHidden = true
-        rememberIPSwitch.isHidden = true
-        rememberIPLabel.isHidden = true
-        
         if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
             savedIPLabel.text = "Saved IP: \(savedIP)"
             savedIPLabel.isHidden = false
@@ -288,7 +280,6 @@ class ViewController: UIViewController {
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
-        view.bringSubviewToFront(logTextView)
         
         DispatchQueue.global(qos: .background).async {
             self.networkScanner.startNetworkScan()
@@ -483,7 +474,6 @@ class ViewController: UIViewController {
             self.refreshButton.isHidden = false
             self.ipLabel.isHidden = false
             self.retryButton.isHidden = true
-            self.view.bringSubviewToFront(self.refreshButton)
         }
     }
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!) {
@@ -491,7 +481,6 @@ class ViewController: UIViewController {
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
             self.retryButton.isHidden = false
-            self.view.bringSubviewToFront(self.retryButton)
         }
     }
 }
@@ -637,7 +626,6 @@ extension ViewController: NetworkScannerDelegate {
             self.retryButton.isHidden = false
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
-            self.view.bringSubviewToFront(self.retryButton)
         }
     }
     
