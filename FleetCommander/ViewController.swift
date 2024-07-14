@@ -32,25 +32,30 @@ class ViewController: UIViewController {
     var savedIPLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
-        networkScanner = NetworkScanner()
-        networkScanner.viewController = self
-        networkScanner.delegate = self
+        
+        setupInitialOptionsView()
         setupSpinner()
         setupStatusLabel()
         setupRefreshButton()
         setupIPLabel()
         setupRetryButton()
         setupLogTextView()
-        startLogUpdateTimer()
-        setupInitialOptionsView()
         setupForgetIPButton()
         setupSavedIPLabel()
         
+        networkScanner = NetworkScanner()
+        networkScanner.viewController = self
+        networkScanner.delegate = self
+        
+        startLogUpdateTimer()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
+        view.sendSubviewToBack(webView)
         
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: self.view.topAnchor),
@@ -58,8 +63,7 @@ class ViewController: UIViewController {
             webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
-        self.view.addSubview(webView)
-        self.view.sendSubviewToBack(webView)
+        
         self.view.backgroundColor = UIColor.systemBackground
         webView.backgroundColor = UIColor.systemBackground
         webView.isOpaque = false
@@ -67,6 +71,11 @@ class ViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         webView.scrollView.delegate = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
         if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
             connectToIP(savedIP)
         } else {
