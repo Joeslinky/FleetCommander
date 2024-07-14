@@ -31,6 +31,8 @@ class ViewController: UIViewController {
     var initialOptionsView: UIView!
     var forgetIPButton: UIButton!
     var rememberIPLabel: UILabel!
+    var choiceLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -90,7 +92,7 @@ class ViewController: UIViewController {
         view.addSubview(initialOptionsView)
         view.bringSubviewToFront(initialOptionsView)
     
-        let choiceLabel = UILabel()
+        choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
         choiceLabel.textColor = .black
         choiceLabel.translatesAutoresizingMaskIntoConstraints = false
