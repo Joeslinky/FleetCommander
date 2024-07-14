@@ -55,25 +55,25 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         let webConfiguration = WKConfiguration()
-         = WK(frame: .zero, configuration: webConfiguration)
-        .translatesAutoresizingMaskIntoConstraints = false
+        webView = WK(frame: .zero, configuration: webConfiguration)
+        webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview()
         view.sendSubviewToBack()
         
         NSLayoutConstraint.activate([
-            .topAnchor.constraint(equalTo: self.view.topAnchor),
-            .bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            .leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            .trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+            webView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
         
         self.view.backgroundColor = UIColor.systemBackground
-        .backgroundColor = UIColor.systemBackground
-        .isOpaque = false
-        .navigationDelegate = self
-        .scrollView.contentInsetAdjustmentBehavior = .never
-        .scrollView.bounces = false
-        .scrollView.delegate = self
+        webView.backgroundColor = UIColor.systemBackground
+        webView.isOpaque = false
+        webView.navigationDelegate = self
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.bounces = false
+        webView.scrollView.delegate = self
         
         self.view.setUserInteraction(enabled: true)
     }
