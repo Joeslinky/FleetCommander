@@ -92,6 +92,7 @@ class ViewController: UIViewController {
         initialOptionsView.isUserInteractionEnabled = true
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
+        view.bringSubviewToFront(initialOptionsView)
     
         choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
@@ -116,6 +117,7 @@ class ViewController: UIViewController {
         configureButton(autodiscoveryButton, "Auto-Discovery")
         autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
+        autodiscoveryButton.isUserInteractionEnabled = true
         autodiscoveryButton.isHidden = true
         initialOptionsView.addSubview(autodiscoveryButton)
     
@@ -123,6 +125,7 @@ class ViewController: UIViewController {
         configureButton(manualEntryButton, "Manual IP Entry")
         manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
+        manualEntryButton.isUserInteractionEnabled = true
         manualEntryButton.isHidden = true
         initialOptionsView.addSubview(manualEntryButton)
     
@@ -682,13 +685,5 @@ extension ViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         manualIPButtonTapped()
         return true
-    }
-}
-extension UIView {
-    func setUserInteraction(enabled: Bool) {
-        self.isUserInteractionEnabled = enabled
-        for subview in subviews {
-            subview.setUserInteraction(enabled: enabled)
-        }
     }
 }
