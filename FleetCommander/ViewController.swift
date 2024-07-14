@@ -195,7 +195,7 @@ class ViewController: UIViewController {
     private func setupForgetIPButton() {
         forgetIPButton = UIButton(type: .system)
         forgetIPButton.setTitle("Forget Saved IP", for: .normal)
-        forgetIPButton.addTarget(self, selector: #selector(forgetIPButtonTapped), for: .touchUpInside)
+        forgetIPButton.addTarget(self, action: #selector(forgetIPButtonTapped), for: .touchUpInside)
         forgetIPButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(forgetIPButton)
 
@@ -482,7 +482,7 @@ class ViewController: UIViewController {
             self.refreshButton.isHidden = false
             self.ipLabel.isHidden = false
             self.retryButton.isHidden = true
-            view.bringSubviewToFront(self.refreshButton)
+            self.view.bringSubviewToFront(self.refreshButton)
         }
     }
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!) {
@@ -490,7 +490,7 @@ class ViewController: UIViewController {
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
             self.retryButton.isHidden = false
-            view.bringSubviewToFront(self.retryButton)
+            self.view.bringSubviewToFront(self.retryButton)
         }
     }
 }
@@ -636,7 +636,7 @@ extension ViewController: NetworkScannerDelegate {
             self.retryButton.isHidden = false
             self.statusLabel.text = "Connection Timed Out"
             self.spinner.stopAnimating()
-            view.bringSubviewToFront(self.retryButton)
+            self.view.bringSubviewToFront(self.retryButton)
         }
     }
     
