@@ -92,7 +92,6 @@ class ViewController: UIViewController {
         initialOptionsView.isUserInteractionEnabled = true
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
-        view.bringSubviewToFront(initialOptionsView)
     
         choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
@@ -181,8 +180,6 @@ class ViewController: UIViewController {
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
-    
-        initialOptionsView.isHidden = true
     }
     
     @objc func showManualIPEntry() {
