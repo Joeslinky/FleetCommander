@@ -30,6 +30,7 @@ class ViewController: UIViewController {
     var initialOptionsView: UIView!
     var forgetIPButton: UIButton!
     var savedIPLabel: UILabel!
+    var rememberIPLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -125,7 +126,7 @@ class ViewController: UIViewController {
         rememberIPSwitch.isHidden = true
         initialOptionsView.addSubview(rememberIPSwitch)
         
-        let rememberIPLabel = UILabel()
+        rememberIPLabel = UILabel()
         rememberIPLabel.text = "Remember IP"
         rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
         rememberIPLabel.isHidden = true
