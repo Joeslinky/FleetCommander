@@ -28,6 +28,8 @@ class ViewController: UIViewController {
     var autodiscoveryButton: UIButton!
     var rememberIPSwitch: UISwitch!
     var initialOptionsView: UIView!
+    var forgetIPButton: UIButton!
+    var savedIPLabel: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
         networkScanner = NetworkScanner()
@@ -41,6 +43,8 @@ class ViewController: UIViewController {
         setupLogTextView()
         startLogUpdateTimer()
         setupInitialOptionsView()
+        setupForgetIPButton()
+        setupSavedIPLabel()
         
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         let webConfiguration = WKWebViewConfiguration()
@@ -126,17 +130,57 @@ class ViewController: UIViewController {
         
         initialOptionsView.isHidden = true
     }
+
+    private func setupForgetIPButton() {
+        forgetIPButton = UIButton(type: .system)
+        forgetIPButton.setTitle("Forget Saved IP", for: .normal)
+        forgetIPButton.addTarget(self, action: #selector(forgetIPButtonTapped), for: .touchUpInside)
+        forgetIPButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(forgetIPButton)
+
+        NSLayoutConstraint.activate([
+            forgetIPButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            forgetIPButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+        
+        forgetIPButton.isHidden = true
+    }
+
+    private func setupSavedIPLabel() {
+        savedIPLabel = UILabel()
+        savedIPLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(savedIPLabel)
+
+        NSLayoutConstraint.activate([
+            savedIPLabel.topAnchor.constraint(equalTo: forgetIPButton.bottomAnchor, constant: 10),
+            savedIPLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+        
+        savedIPLabel.isHidden = true
+    }
+
+    @objc func forgetIPButtonTapped() {
+        UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
+        showInitialOptions()
+    }
     
     private func showInitialOptions() {
         initialOptionsView.isHidden = false
         webView.isHidden = true
-        // Hide other UI elements
         spinner.isHidden = true
         statusLabel.isHidden = true
         refreshButton.isHidden = true
         ipLabel.isHidden = true
         retryButton.isHidden = true
         logTextView.isHidden = true
+        forgetIPButton.isHidden = true
+        savedIPLabel.isHidden = true
+        
+        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
+            savedIPLabel.text = "Saved IP: \(savedIP)"
+            savedIPLabel.isHidden = false
+            forgetIPButton.isHidden = false
+        }
     }
     
     @objc func manualIPButtonTapped() {
@@ -455,6 +499,13 @@ extension ViewController: WKNavigationDelegate {
                 print("Photo library access not granted")
             }
         }
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+        }
     }
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
@@ -516,6 +567,7 @@ extension ViewController: NetworkScannerDelegate {
             self.spinner.stopAnimating()
         }
     }
+    
     func loadWebPage(with ipAddress:String) {
         DispatchQueue.main.async {
             self.statusLabel.text = "Device found at \(ipAddress)..."
@@ -527,7 +579,37 @@ extension ViewController: NetworkScannerDelegate {
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { // 10-second timeout
+            if self.webView.isLoading {
+                self.webView.stopLoading()
+                self.handleConnectionFailure(for: ipAddress)
+            }
+        }
     }
+
+    private func handleConnectionFailure(for ipAddress: String) {
+        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP?", actions: [
+            UIAlertAction(title: "Try Again", style: .default) { _ in
+                self.connectToIP(ipAddress)
+            },
+            UIAlertAction(title: "Enter New IP", style: .default) { _ in
+                self.showInitialOptions()
+                self.manualIPTextField.text = ipAddress
+            },
+            UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                self.showInitialOptions()
+            }
+        ])
+    }
+
+    func showAlert(title: String, message: String, actions: [UIAlertAction]) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        for action in actions {
+            alert.addAction(action)
+        }
+        present(alert, animated: true, completion: nil)
+    }
+        
     func appendLogMessage(_ message: String) {
         DispatchQueue.main.async {
             self.logBuffer.append(message)
@@ -537,6 +619,7 @@ extension ViewController: NetworkScannerDelegate {
             }
         }
     }
+        
     @objc func updateLogView() {
         DispatchQueue.main.async {
             if !self.logBuffer.isEmpty {
