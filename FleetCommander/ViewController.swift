@@ -54,11 +54,11 @@ class ViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        let webConfiguration = WKConfiguration()
-        webView = WK(frame: .zero, configuration: webConfiguration)
+        let webConfiguration = WKWebViewConfiguration()
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview()
-        view.sendSubviewToBack()
+        view.addSubview(webView)
+        view.sendSubviewToBack(webView)
         
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: self.view.topAnchor),
