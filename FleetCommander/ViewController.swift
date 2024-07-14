@@ -54,26 +54,26 @@ class ViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
-        let webConfiguration = WKWebViewConfiguration()
-        webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(webView)
-        view.sendSubviewToBack(webView)
+        let webConfiguration = WKConfiguration()
+         = WK(frame: .zero, configuration: webConfiguration)
+        .translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview()
+        view.sendSubviewToBack()
         
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+            .topAnchor.constraint(equalTo: self.view.topAnchor),
+            .bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            .leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            .trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
         
         self.view.backgroundColor = UIColor.systemBackground
-        webView.backgroundColor = UIColor.systemBackground
-        webView.isOpaque = false
-        webView.navigationDelegate = self
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.scrollView.bounces = false
-        webView.scrollView.delegate = self
+        .backgroundColor = UIColor.systemBackground
+        .isOpaque = false
+        .navigationDelegate = self
+        .scrollView.contentInsetAdjustmentBehavior = .never
+        .scrollView.bounces = false
+        .scrollView.delegate = self
         
         self.view.setUserInteraction(enabled: true)
     }
@@ -212,7 +212,6 @@ class ViewController: UIViewController {
     
     func showInitialOptions() {
         initialOptionsView.isHidden = false
-        webView.isHidden = true
         spinner.isHidden = true
         statusLabel.isHidden = true
         refreshButton.isHidden = true
@@ -258,7 +257,6 @@ class ViewController: UIViewController {
     
     @objc func autodiscoveryButtonTapped() {
         initialOptionsView.isHidden = true
-        webView.isHidden = false
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
@@ -270,7 +268,6 @@ class ViewController: UIViewController {
     
     private func connectToIP(_ ipAddress: String) {
         initialOptionsView.isHidden = true
-        webView.isHidden = false
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
