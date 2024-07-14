@@ -160,7 +160,7 @@ class ViewController: UIViewController {
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
         
-        initialOptionsView.isHidden = true
+        initialOptionsView.isHidden = false
     }
     
     @objc func showManualIPEntry() {
@@ -215,6 +215,13 @@ class ViewController: UIViewController {
         logTextView.isHidden = true
         forgetIPButton.isHidden = true
         savedIPLabel.isHidden = true
+        
+        autodiscoveryButton.isHidden = false
+        
+        manualIPTextField.isHidden = true
+        manualIPButton.isHidden = true
+        rememberIPSwitch.isHidden = true
+        rememberIPLabel.isHidden = true
         
         if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
             savedIPLabel.text = "Saved IP: \(savedIP)"
