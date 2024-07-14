@@ -164,7 +164,7 @@ class ViewController: UIViewController {
         showInitialOptions()
     }
     
-    private func showInitialOptions() {
+    func showInitialOptions() {
         initialOptionsView.isHidden = false
         webView.isHidden = true
         spinner.isHidden = true
