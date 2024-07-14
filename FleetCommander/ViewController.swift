@@ -25,6 +25,7 @@ class ViewController: UIViewController {
     var downloadProgressLabel: UILabel?
     var manualIPTextField: UITextField!
     var manualIPButton: UIButton!
+    var manualEntryButton: UIButton!
     var autodiscoveryButton: UIButton!
     var rememberIPSwitch: UISwitch!
     var initialOptionsView: UIView!
