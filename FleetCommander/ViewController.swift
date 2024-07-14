@@ -9,7 +9,7 @@ import WebKit
 import Network
 import SystemConfiguration
 import Photos
-class ViewController: UIViewController, UITextFieldDelegate {
+class ViewController: UIViewController {
     var webView: WKWebView!
     var networkScanner: NetworkScanner!
     var spinner: UIActivityIndicatorView!
