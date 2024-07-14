@@ -93,18 +93,29 @@ class ViewController: UIViewController {
         
         let choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
+        choiceLabel.textColor = .black
         choiceLabel.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(choiceLabel)
+        
+        let styleButton: (UIButton) -> Void = { button in
+            button.backgroundColor = .systemBlue
+            button.setTitleColor(.white, for: .normal)
+            button.layer.cornerRadius = 15
+            button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+            button.clipsToBounds = true
+        }
         
         autodiscoveryButton = UIButton(type: .system)
         autodiscoveryButton.setTitle("Use Autodiscovery", for: .normal)
         autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
+        styleButton(autodiscoveryButton)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(autodiscoveryButton)
         
         let manualEntryButton = UIButton(type: .system)
         manualEntryButton.setTitle("Manual IP Entry", for: .normal)
         manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
+        styleButton(manualEntryButton)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(manualEntryButton)
         
@@ -119,6 +130,7 @@ class ViewController: UIViewController {
         manualIPButton = UIButton(type: .system)
         manualIPButton.setTitle("Connect", for: .normal)
         manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
+        styleButton(manualIPButton)
         manualIPButton.translatesAutoresizingMaskIntoConstraints = false
         manualIPButton.isHidden = true
         initialOptionsView.addSubview(manualIPButton)
@@ -130,6 +142,7 @@ class ViewController: UIViewController {
         
         rememberIPLabel = UILabel()
         rememberIPLabel.text = "Remember IP"
+        rememberIPLabel.textColor = .black
         rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
         rememberIPLabel.isHidden = true
         initialOptionsView.addSubview(rememberIPLabel)
@@ -161,30 +174,7 @@ class ViewController: UIViewController {
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
-    
-        let styleButton: (UIButton) -> Void = { button in
-            button.backgroundColor = .systemBlue
-            button.setTitleColor(.white, for: .normal)
-            button.layer.cornerRadius = 15
-            button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
-            button.clipsToBounds = true
-        }
-    
-        autodiscoveryButton = UIButton(type: .system)
-        autodiscoveryButton.setTitle("Use Auto-Discovery", for: .normal)
-        autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
-        styleButton(autodiscoveryButton)
-        autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
-        initialOptionsView.addSubview(autodiscoveryButton)
-    
-        let manualEntryButton = UIButton(type: .system)
-        manualEntryButton.setTitle("Manual IP Entry", for: .normal)
-        manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
-        styleButton(manualEntryButton)
-        manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
-        initialOptionsView.addSubview(manualEntryButton)
-
-        choiceLabel.textColor = .black
+        
         initialOptionsView.isHidden = false
     }
     
