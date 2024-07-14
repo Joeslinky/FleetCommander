@@ -90,95 +90,92 @@ class ViewController: UIViewController {
         initialOptionsView = UIView()
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
-        
+    
         let choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
         choiceLabel.textColor = .black
         choiceLabel.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(choiceLabel)
-        
-        let styleButton: (UIButton) -> Void = { button in
-            button.backgroundColor = .systemBlue
-            button.setTitleColor(.white, for: .normal)
+    
+        let configureButton: (UIButton, String) -> Void = { button, title in
+            var configuration = UIButton.Configuration.filled()
+            configuration.title = title
+            configuration.baseBackgroundColor = .systemBlue
+            configuration.baseForegroundColor = .white
+            configuration.cornerStyle = .medium
+            configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            button.configuration = configuration
             button.layer.cornerRadius = 15
             button.clipsToBounds = true
         }
-        
+    
         autodiscoveryButton = UIButton(type: .system)
-        autodiscoveryButton.setTitle("Use Auto-Discovery", for: .normal)
-        autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
-        autodiscoveryButton.isUserInteractionEnabled = true
-        styleButton(autodiscoveryButton)
+        configureButton(autodiscoveryButton, "Auto-Discovery")
+        autodiscoveryButton.addTarget(self, selector: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
         autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(autodiscoveryButton)
-        
-        let manualEntryButton = UIButton(type: .system)
-        manualEntryButton.setTitle("Manual IP Entry", for: .normal)
-        manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
-        manualEntryButton.isUserInteractionEnabled = true
-        styleButton(manualEntryButton)
+    
+        manualEntryButton = UIButton(type: .system)
+        configureButton(manualEntryButton, "Manual IP Entry")
+        manualEntryButton.addTarget(self, selector: #selector(showManualIPEntry), for: .touchUpInside)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
         initialOptionsView.addSubview(manualEntryButton)
-        
+    
         manualIPTextField = UITextField()
         manualIPTextField.placeholder = "Enter IP Address"
         manualIPTextField.borderStyle = .roundedRect
         manualIPTextField.translatesAutoresizingMaskIntoConstraints = false
-        manualIPTextField.isUserInteractionEnabled = true
         manualIPTextField.isHidden = true
         manualIPTextField.delegate = self
         initialOptionsView.addSubview(manualIPTextField)
-        
+    
         manualIPButton = UIButton(type: .system)
-        manualIPButton.setTitle("Connect", for: .normal)
-        manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
-        manualIPButton.isUserInteractionEnabled = true
-        styleButton(manualIPButton)
+        configureButton(manualIPButton, "Connect")
+        manualIPButton.addTarget(self, selector: #selector(manualIPButtonTapped), for: .touchUpInside)
         manualIPButton.translatesAutoresizingMaskIntoConstraints = false
         manualIPButton.isHidden = true
         initialOptionsView.addSubview(manualIPButton)
-        
+    
         rememberIPSwitch = UISwitch()
         rememberIPSwitch.translatesAutoresizingMaskIntoConstraints = false
         rememberIPSwitch.isHidden = true
-        rememberIPSwitch.isUserInteractionEnabled = true
         initialOptionsView.addSubview(rememberIPSwitch)
-        
+    
         rememberIPLabel = UILabel()
         rememberIPLabel.text = "Remember IP"
         rememberIPLabel.textColor = .black
         rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
         rememberIPLabel.isHidden = true
         initialOptionsView.addSubview(rememberIPLabel)
-        
+    
         NSLayoutConstraint.activate([
             initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            
+    
             choiceLabel.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
             choiceLabel.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-            
+    
             autodiscoveryButton.topAnchor.constraint(equalTo: choiceLabel.bottomAnchor, constant: 20),
             autodiscoveryButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-            
+    
             manualEntryButton.topAnchor.constraint(equalTo: autodiscoveryButton.bottomAnchor, constant: 20),
             manualEntryButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-            
+    
             manualIPTextField.topAnchor.constraint(equalTo: manualEntryButton.bottomAnchor, constant: 20),
             manualIPTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
             manualIPTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
-            
+    
             manualIPButton.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
             manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-            
+    
             rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
             rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
-            
+    
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
-        
+    
         initialOptionsView.isHidden = false
     }
     
@@ -193,7 +190,7 @@ class ViewController: UIViewController {
     private func setupForgetIPButton() {
         forgetIPButton = UIButton(type: .system)
         forgetIPButton.setTitle("Forget Saved IP", for: .normal)
-        forgetIPButton.addTarget(self, action: #selector(forgetIPButtonTapped), for: .touchUpInside)
+        forgetIPButton.addTarget(self, selector: #selector(forgetIPButtonTapped), for: .touchUpInside)
         forgetIPButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(forgetIPButton)
 
