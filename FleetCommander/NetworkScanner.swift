@@ -27,6 +27,7 @@ class NetworkScanner {
                 self.isSearchTimedOut = true
                 self.delegate?.showRetryButton()
                 self.logMessage("No devices found")
+                self.viewController?.showInitialOptions()
             }
         }
     }
