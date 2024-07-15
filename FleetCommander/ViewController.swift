@@ -74,8 +74,6 @@ class ViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         webView.scrollView.delegate = self
-        
-        self.view.setUserInteraction(enabled: true)
     }
     
     override func viewDidAppear(_ animated: Bool) {
