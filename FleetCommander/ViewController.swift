@@ -216,6 +216,7 @@ class ViewController: UIViewController {
     }
     
     @objc func manualIPButtonTapped() {
+        view.endEditing(true)
         guard let ipAddress = manualIPTextField.text, !ipAddress.isEmpty else {
             showAlert(title: "Error", message: "Please enter an IP address.")
             return
@@ -623,6 +624,7 @@ extension ViewController: NetworkScannerDelegate {
                 self.connectToIP(ipAddress)
             },
             UIAlertAction(title: "Enter New IP", style: .default) { _ in
+                self.initialOptionsView.isHidden = false
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
                 self.manualIPTextField.isHidden = false
