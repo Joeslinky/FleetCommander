@@ -10,7 +10,6 @@ import Network
 import SystemConfiguration
 import Photos
 class ViewController: UIViewController {
-    // Properties
     var webView: WKWebView!
     var networkScanner: NetworkScanner!
     var spinner: UIActivityIndicatorView!
@@ -24,26 +23,40 @@ class ViewController: UIViewController {
     var downloadAlert: UIAlertController?
     var downloadTask: URLSessionDownloadTask?
     var downloadProgressLabel: UILabel?
+    var manualIPTextField: UITextField!
+    var manualIPButton: UIButton!
+    var manualEntryButton: UIButton!
+    var autodiscoveryButton: UIButton!
+    var rememberIPSwitch: UISwitch!
+    var initialOptionsView: UIView!
+    var rememberIPLabel: UILabel!
+    var choiceLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        networkScanner = NetworkScanner()
-        networkScanner.viewController = self
-        networkScanner.delegate = self
+        
+        setupInitialOptionsView()
         setupSpinner()
         setupStatusLabel()
         setupRefreshButton()
         setupIPLabel()
         setupRetryButton()
         setupLogTextView()
+        
+        networkScanner = NetworkScanner()
+        networkScanner.viewController = self
+        networkScanner.delegate = self
+        manualIPTextField.delegate = self
+        
         startLogUpdateTimer()
-        DispatchQueue.global(qos: .background).async {
-            self.networkScanner.startNetworkScan()
-        }
+        
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        
         let webConfiguration = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
+        view.sendSubviewToBack(webView)
         
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: self.view.topAnchor),
@@ -51,8 +64,7 @@ class ViewController: UIViewController {
             webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
-        self.view.addSubview(webView)
-        self.view.sendSubviewToBack(webView)
+        
         self.view.backgroundColor = UIColor.systemBackground
         webView.backgroundColor = UIColor.systemBackground
         webView.isOpaque = false
@@ -60,6 +72,202 @@ class ViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         webView.scrollView.delegate = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
+            connectToIP(savedIP)
+        } else {
+            showInitialOptions()
+        }
+    }
+    private func setupInitialOptionsView() {
+        initialOptionsView = UIView()
+        initialOptionsView.isUserInteractionEnabled = true
+        initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(initialOptionsView)
+        view.bringSubviewToFront(initialOptionsView)
+        initialOptionsView.backgroundColor = .systemBackground.withAlphaComponent(0.9)
+    
+        choiceLabel = UILabel()
+        choiceLabel.text = "Choose connection method:"
+        if traitCollection.userInterfaceStyle == .dark {
+            choiceLabel.textColor = .white
+        } else {
+            choiceLabel.textColor = .black
+        }
+        choiceLabel.translatesAutoresizingMaskIntoConstraints = false
+        choiceLabel.isHidden = true
+        initialOptionsView.addSubview(choiceLabel)
+    
+        let configureButton: (UIButton, String) -> Void = { button, title in
+            var configuration = UIButton.Configuration.filled()
+            configuration.title = title
+            configuration.baseBackgroundColor = .systemBlue
+            configuration.baseForegroundColor = .white
+            configuration.cornerStyle = .medium
+            configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            button.configuration = configuration
+            button.layer.cornerRadius = 15
+            button.clipsToBounds = true
+        }
+    
+        autodiscoveryButton = UIButton(type: .system)
+        configureButton(autodiscoveryButton, "Auto-Discovery")
+        autodiscoveryButton.addTarget(self, action: #selector(autodiscoveryButtonTapped), for: .touchUpInside)
+        autodiscoveryButton.translatesAutoresizingMaskIntoConstraints = false
+        autodiscoveryButton.isUserInteractionEnabled = true
+        autodiscoveryButton.isHidden = true
+        initialOptionsView.addSubview(autodiscoveryButton)
+    
+        manualEntryButton = UIButton(type: .system)
+        configureButton(manualEntryButton, "Manual IP Entry")
+        manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
+        manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
+        manualEntryButton.isUserInteractionEnabled = true
+        manualEntryButton.isHidden = true
+        initialOptionsView.addSubview(manualEntryButton)
+    
+        manualIPTextField = UITextField()
+        manualIPTextField.placeholder = "Enter IP Address"
+        manualIPTextField.borderStyle = .roundedRect
+        manualIPTextField.translatesAutoresizingMaskIntoConstraints = false
+        manualIPTextField.isHidden = true
+        manualIPTextField.delegate = self
+        initialOptionsView.addSubview(manualIPTextField)
+    
+        manualIPButton = UIButton(type: .system)
+        configureButton(manualIPButton, "Connect")
+        manualIPButton.addTarget(self, action: #selector(manualIPButtonTapped), for: .touchUpInside)
+        manualIPButton.translatesAutoresizingMaskIntoConstraints = false
+        manualIPButton.isHidden = true
+        initialOptionsView.addSubview(manualIPButton)
+    
+        rememberIPSwitch = UISwitch()
+        rememberIPSwitch.translatesAutoresizingMaskIntoConstraints = false
+        rememberIPSwitch.isHidden = true
+        initialOptionsView.addSubview(rememberIPSwitch)
+    
+        rememberIPLabel = UILabel()
+        rememberIPLabel.text = "Remember IP"
+        if self.traitCollection.userInterfaceStyle == .dark {
+            self.rememberIPLabel.textColor = .white
+        } else {
+            self.rememberIPLabel.textColor = .black
+        }
+        rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
+        rememberIPLabel.isHidden = true
+        initialOptionsView.addSubview(rememberIPLabel)
+    
+        NSLayoutConstraint.activate([
+            initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            initialOptionsView.heightAnchor.constraint(equalToConstant: 300),
+    
+            choiceLabel.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
+            choiceLabel.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+    
+            autodiscoveryButton.topAnchor.constraint(equalTo: choiceLabel.bottomAnchor, constant: 20),
+            autodiscoveryButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+    
+            manualEntryButton.topAnchor.constraint(equalTo: autodiscoveryButton.bottomAnchor, constant: 20),
+            manualEntryButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+    
+            manualIPTextField.topAnchor.constraint(equalTo: manualEntryButton.bottomAnchor, constant: 20),
+            manualIPTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+            manualIPTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
+    
+            manualIPButton.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
+            manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+    
+            rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
+            rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+    
+            rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
+            rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
+        ])
+    }
+    
+    @objc func showManualIPEntry() {
+        manualIPTextField.isHidden = false
+        manualIPButton.isHidden = false
+        rememberIPSwitch.isHidden = false
+        rememberIPLabel.isHidden = false
+        autodiscoveryButton.isHidden = true
+        manualEntryButton.isHidden = true
+        choiceLabel.isHidden = true
+    }
+    
+    func showInitialOptions() {
+        DispatchQueue.main.async {
+            self.initialOptionsView.isHidden = false
+            self.spinner.isHidden = true
+            self.statusLabel.isHidden = true
+            self.refreshButton.isHidden = true
+            self.ipLabel.isHidden = true
+            self.retryButton.isHidden = true
+            self.logTextView.isHidden = true
+            
+            self.autodiscoveryButton.isHidden = false
+            self.manualEntryButton.isHidden = false
+            self.choiceLabel.isHidden = false
+            
+            self.view.bringSubviewToFront(self.initialOptionsView)
+        }
+    }
+    
+    @objc func manualIPButtonTapped() {
+        view.endEditing(true)
+        guard let ipAddress = manualIPTextField.text, !ipAddress.isEmpty else {
+            showAlert(title: "Error", message: "Please enter an IP address.")
+            return
+        }
+        
+        if !isValidIPAddress(ipAddress) {
+            showAlert(title: "Invalid IP", message: "Please enter a valid IP address.")
+            return
+        }
+        
+        if rememberIPSwitch.isOn {
+            UserDefaults.standard.set(ipAddress, forKey: "SavedIPAddress")
+        }
+        
+        connectToIP(ipAddress)
+    }
+    
+    func isValidIPAddress(_ ipAddress: String) -> Bool {
+        let ipAddressRegex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        let ipPredicate = NSPredicate(format: "SELF MATCHES %@", ipAddressRegex)
+        return ipPredicate.evaluate(with: ipAddress)
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func autodiscoveryButtonTapped() {
+        initialOptionsView.isHidden = true
+        spinner.isHidden = false
+        statusLabel.isHidden = false
+        logTextView.isHidden = false
+        
+        DispatchQueue.global(qos: .background).async {
+            self.networkScanner.startNetworkScan()
+        }
+    }
+    
+    private func connectToIP(_ ipAddress: String) {
+        initialOptionsView.isHidden = true
+        spinner.isHidden = false
+        statusLabel.isHidden = false
+        logTextView.isHidden = false
+        
+        loadWebPage(with: ipAddress)
     }
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
@@ -77,7 +285,7 @@ class ViewController: UIViewController {
             } else {
                 self.spinner.color = .black
             }
-            self.spinner.isHidden = false
+            self.spinner.isHidden = true
             self.spinner.center = self.view.center
             self.view.addSubview(self.spinner)
             self.spinner.startAnimating()
@@ -88,6 +296,7 @@ class ViewController: UIViewController {
             self.statusLabel = UILabel()
             self.statusLabel.translatesAutoresizingMaskIntoConstraints = false
             self.statusLabel.textAlignment = .center
+            self.statusLabel.isHidden = true
             if self.traitCollection.userInterfaceStyle == .dark {
                 self.statusLabel.textColor = .white
             } else {
@@ -173,6 +382,7 @@ class ViewController: UIViewController {
             self.logTextView.translatesAutoresizingMaskIntoConstraints = false
             self.logTextView.isEditable = false
             self.logTextView.isSelectable = false
+            self.logTextView.isHidden = true
             if self.traitCollection.userInterfaceStyle == .dark {
                 self.logTextView.backgroundColor = UIColor.black
                 self.logTextView.textColor = UIColor.white
@@ -324,6 +534,13 @@ extension ViewController: WKNavigationDelegate {
                 print("Photo library access not granted")
             }
         }
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+        }
     }
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
@@ -385,9 +602,10 @@ extension ViewController: NetworkScannerDelegate {
             self.spinner.stopAnimating()
         }
     }
+    
     func loadWebPage(with ipAddress:String) {
         DispatchQueue.main.async {
-            self.statusLabel.text = "Device found at \(ipAddress)..."
+            self.statusLabel.text = "Trying \(ipAddress)..."
             self.retryButton.isHidden = true
             self.logTextView.isHidden = true
             self.spinner.startAnimating()
@@ -396,7 +614,51 @@ extension ViewController: NetworkScannerDelegate {
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { // 10-second timeout
+            if self.webView.isLoading {
+                self.webView.stopLoading()
+                self.handleConnectionFailure(for: ipAddress)
+            }
+        }
     }
+
+    private func handleConnectionFailure(for ipAddress: String) {
+        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP?", actions: [
+            UIAlertAction(title: "Try Again", style: .default) { _ in
+                self.connectToIP(ipAddress)
+            },
+            UIAlertAction(title: "Enter New IP", style: .default) { _ in
+                self.initialOptionsView.isHidden = false
+                self.spinner.isHidden = true
+                self.statusLabel.isHidden = true
+                self.manualIPTextField.isHidden = false
+                self.manualEntryButton.isHidden = true;
+                self.autodiscoveryButton.isHidden = true;
+                self.manualIPButton.isHidden = false
+                self.rememberIPSwitch.isHidden = false
+                self.rememberIPLabel.isHidden = false
+                self.choiceLabel.isHidden = true
+                self.manualIPTextField.text = ipAddress
+            },
+            UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                self.showInitialOptions()
+                self.manualIPTextField.isHidden = true
+                self.manualIPButton.isHidden = true
+                self.rememberIPSwitch.isHidden = true
+                self.rememberIPLabel.isHidden = true
+                UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
+            }
+        ])
+    }
+
+    func showAlert(title: String, message: String, actions: [UIAlertAction]) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        for action in actions {
+            alert.addAction(action)
+        }
+        present(alert, animated: true, completion: nil)
+    }
+        
     func appendLogMessage(_ message: String) {
         DispatchQueue.main.async {
             self.logBuffer.append(message)
@@ -406,6 +668,7 @@ extension ViewController: NetworkScannerDelegate {
             }
         }
     }
+        
     @objc func updateLogView() {
         DispatchQueue.main.async {
             if !self.logBuffer.isEmpty {
@@ -421,5 +684,12 @@ extension ViewController: UIScrollViewDelegate {
         if scrollView.contentOffset.y > scrollView.contentSize.height - scrollView.frame.size.height {
             scrollView.contentOffset.y = scrollView.contentSize.height - scrollView.frame.size.height
         }
+    }
+}
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        manualIPButtonTapped()
+        return true
     }
 }
