@@ -93,7 +93,11 @@ class ViewController: UIViewController {
     
         choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
-        choiceLabel.textColor = .black
+        if traitCollection.userInterfaceStyle == .dark {
+            choiceLabel.textColor = .white
+        } else {
+            choiceLabel.textColor = .black
+        }
         choiceLabel.translatesAutoresizingMaskIntoConstraints = false
         choiceLabel.isHidden = true
         initialOptionsView.addSubview(choiceLabel)
