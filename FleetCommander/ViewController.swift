@@ -91,6 +91,7 @@ class ViewController: UIViewController {
         initialOptionsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(initialOptionsView)
         view.bringSubviewToFront(initialOptionsView)
+        initialOptionsView.backgroundColor = .systemBackground.withAlphaComponent(0.9)
     
         choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
@@ -158,6 +159,7 @@ class ViewController: UIViewController {
             initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            initialOptionsView.heightAnchor.constraint(equalToConstant: 300)
     
             choiceLabel.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
             choiceLabel.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
@@ -212,18 +214,22 @@ class ViewController: UIViewController {
     }
     
     func showInitialOptions() {
-        initialOptionsView.isHidden = false
-        spinner.isHidden = true
-        statusLabel.isHidden = true
-        refreshButton.isHidden = true
-        ipLabel.isHidden = true
-        retryButton.isHidden = true
-        logTextView.isHidden = true
-        forgetIPButton.isHidden = true
-        
-        autodiscoveryButton.isHidden = false
-        manualEntryButton.isHidden = false
-        choiceLabel.isHidden = false
+        DispatchQueue.main.async {
+            self.initialOptionsView.isHidden = false
+            self.spinner.isHidden = true
+            self.statusLabel.isHidden = true
+            self.refreshButton.isHidden = true
+            self.ipLabel.isHidden = true
+            self.retryButton.isHidden = true
+            self.logTextView.isHidden = true
+            self.forgetIPButton.isHidden = true
+            
+            self.autodiscoveryButton.isHidden = false
+            self.manualEntryButton.isHidden = false
+            self.choiceLabel.isHidden = false
+            
+            self.view.bringSubviewToFront(self.initialOptionsView)
+        }
     }
     
     @objc func manualIPButtonTapped() {
