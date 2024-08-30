@@ -151,10 +151,10 @@ class ViewController: UIViewController {
         rememberIPLabel = UILabel()
         rememberIPLabel.text = "Remember IP"
         if self.traitCollection.userInterfaceStyle == .dark {
-                self.rememberIPLabel.textColor = .white
-            } else {
-                self.rememberIPLabel.textColor = .black
-            }
+            self.rememberIPLabel.textColor = .white
+        } else {
+            self.rememberIPLabel.textColor = .black
+        }
         rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
         rememberIPLabel.isHidden = true
         initialOptionsView.addSubview(rememberIPLabel)
@@ -195,6 +195,8 @@ class ViewController: UIViewController {
         rememberIPSwitch.isHidden = false
         rememberIPLabel.isHidden = false
         autodiscoveryButton.isHidden = true
+        manualEntryButton.isHidden = true
+        choiceLabel.isHidden = true
     }
 
     private func setupForgetIPButton() {
@@ -237,10 +239,6 @@ class ViewController: UIViewController {
     }
     
     @objc func manualIPButtonTapped() {
-        DispatchQueue.main.async {
-            self.manualEntryButton.isHidden = true
-            self.choiceLabel.isHidden = true
-        }
         guard let ipAddress = manualIPTextField.text, !ipAddress.isEmpty else {
             showAlert(title: "Error", message: "Please enter an IP address.")
             return
@@ -653,7 +651,7 @@ extension ViewController: NetworkScannerDelegate {
             },
             UIAlertAction(title: "Cancel", style: .cancel) { _ in
                 self.showInitialOptions()
-                self.forgetIPButton.isHidden = true
+                self.forgetIPButton.isHidden = false
             }
         ])
     }
