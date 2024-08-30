@@ -628,6 +628,8 @@ extension ViewController: NetworkScannerDelegate {
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
                 self.manualIPTextField.isHidden = false
+                self.manualEntryButton.isHidden = true;
+                self.autodiscoveryButton.isHidden = true;
                 self.manualIPButton.isHidden = false
                 self.rememberIPSwitch.isHidden = false
                 self.rememberIPLabel.isHidden = false
@@ -636,6 +638,10 @@ extension ViewController: NetworkScannerDelegate {
             },
             UIAlertAction(title: "Cancel", style: .cancel) { _ in
                 self.showInitialOptions()
+                self.manualIPTextField.isHidden = true
+                self.manualIPButton.isHidden = true
+                self.rememberIPSwitch.isHidden = true
+                self.rememberIPLabel.isHidden = true
                 UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
             }
         ])
