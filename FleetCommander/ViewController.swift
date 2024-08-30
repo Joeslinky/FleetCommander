@@ -151,9 +151,9 @@ class ViewController: UIViewController {
         rememberIPLabel = UILabel()
         rememberIPLabel.text = "Remember IP"
         if self.traitCollection.userInterfaceStyle == .dark {
-                self.rememberIPLabel.color = .white
+                self.rememberIPLabel.textColor = .white
             } else {
-                self.rememberIPLabel.color = .black
+                self.rememberIPLabel.textColor = .black
             }
         rememberIPLabel.translatesAutoresizingMaskIntoConstraints = false
         rememberIPLabel.isHidden = true
