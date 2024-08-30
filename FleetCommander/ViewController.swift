@@ -29,7 +29,6 @@ class ViewController: UIViewController {
     var autodiscoveryButton: UIButton!
     var rememberIPSwitch: UISwitch!
     var initialOptionsView: UIView!
-    var forgetIPButton: UIButton!
     var rememberIPLabel: UILabel!
     var choiceLabel: UILabel!
     
@@ -43,7 +42,6 @@ class ViewController: UIViewController {
         setupIPLabel()
         setupRetryButton()
         setupLogTextView()
-        setupForgetIPButton()
         
         networkScanner = NetworkScanner()
         networkScanner.viewController = self
@@ -198,26 +196,6 @@ class ViewController: UIViewController {
         manualEntryButton.isHidden = true
         choiceLabel.isHidden = true
     }
-
-    private func setupForgetIPButton() {
-        forgetIPButton = UIButton(type: .system)
-        forgetIPButton.setTitle("Forget Saved IP", for: .normal)
-        forgetIPButton.addTarget(self, action: #selector(forgetIPButtonTapped), for: .touchUpInside)
-        forgetIPButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(forgetIPButton)
-
-        NSLayoutConstraint.activate([
-            forgetIPButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            forgetIPButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
-        
-        forgetIPButton.isHidden = true
-    }
-
-    @objc func forgetIPButtonTapped() {
-        UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
-        showInitialOptions()
-    }
     
     func showInitialOptions() {
         DispatchQueue.main.async {
@@ -228,7 +206,6 @@ class ViewController: UIViewController {
             self.ipLabel.isHidden = true
             self.retryButton.isHidden = true
             self.logTextView.isHidden = true
-            self.forgetIPButton.isHidden = true
             
             self.autodiscoveryButton.isHidden = false
             self.manualEntryButton.isHidden = false
@@ -646,12 +623,18 @@ extension ViewController: NetworkScannerDelegate {
                 self.connectToIP(ipAddress)
             },
             UIAlertAction(title: "Enter New IP", style: .default) { _ in
-                self.showInitialOptions()
+                self.spinner.isHidden = true
+                self.statusLabel.isHidden = true
+                self.manualIPTextField.isHidden = false
+                self.manualIPButton.isHidden = false
+                self.rememberIPSwitch.isHidden = false
+                self.rememberIPLabel.isHidden = false
+                self.choiceLabel.isHidden = true
                 self.manualIPTextField.text = ipAddress
             },
             UIAlertAction(title: "Cancel", style: .cancel) { _ in
                 self.showInitialOptions()
-                self.forgetIPButton.isHidden = false
+                UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
             }
         ])
     }
