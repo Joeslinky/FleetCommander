@@ -13,14 +13,7 @@ FleetCommander is an advanced iOS app designed specifically for OpenPilot enthus
 ## Getting Started
 
 1. **Join Our Community:** Get support and share your experience on our [Discord channel](https://discord.com/channels/1137853399715549214/1179917160684990545).
-2. **Join TestFlight:** Participate in our beta testing via [TestFlight](https://testflight.apple.com/join/Z4NK5M51).
-
-## Installation
-
-To install FleetCommander, follow these steps:
-
-1. **Install FleetCommander:** Join the TestFlight by clicking on the link above, and then accept beta testing.
-2. It's that easy!
+2. **Download App:** Download FleetCommander [here](https://apps.apple.com/us/app/fleetcommander/id6473572175).
 
 ## Usage
 
