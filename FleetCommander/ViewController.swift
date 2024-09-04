@@ -78,7 +78,7 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         
         if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
-            connectToIP(savedIP)
+            connectToAddress(savedIP)
         } else {
             showInitialOptions()
         }
@@ -123,7 +123,7 @@ class ViewController: UIViewController {
         initialOptionsView.addSubview(autodiscoveryButton)
     
         manualEntryButton = UIButton(type: .system)
-        configureButton(manualEntryButton, "Manual IP Entry")
+        configureButton(manualEntryButton, "Manual Entry")
         manualEntryButton.addTarget(self, action: #selector(showManualIPEntry), for: .touchUpInside)
         manualEntryButton.translatesAutoresizingMaskIntoConstraints = false
         manualEntryButton.isUserInteractionEnabled = true
@@ -131,7 +131,7 @@ class ViewController: UIViewController {
         initialOptionsView.addSubview(manualEntryButton)
     
         manualIPTextField = UITextField()
-        manualIPTextField.placeholder = "Enter IP Address"
+        manualIPTextField.placeholder = "Enter IP/Hostname"
         manualIPTextField.borderStyle = .roundedRect
         manualIPTextField.translatesAutoresizingMaskIntoConstraints = false
         manualIPTextField.isHidden = true
@@ -151,7 +151,7 @@ class ViewController: UIViewController {
         initialOptionsView.addSubview(rememberIPSwitch)
     
         rememberIPLabel = UILabel()
-        rememberIPLabel.text = "Remember IP"
+        rememberIPLabel.text = "Remember IP/Hostname"
         if self.traitCollection.userInterfaceStyle == .dark {
             self.rememberIPLabel.textColor = .white
         } else {
@@ -221,27 +221,37 @@ class ViewController: UIViewController {
     
     @objc func manualIPButtonTapped() {
         view.endEditing(true)
-        guard let ipAddress = manualIPTextField.text, !ipAddress.isEmpty else {
-            showAlert(title: "Error", message: "Please enter an IP address.")
+        guard let inputAddress = manualIPTextField.text, !inputAddress.isEmpty else {
+            showAlert(title: "Error", message: "Please enter an IP address or hostname.")
             return
         }
         
-        if !isValidIPAddress(ipAddress) {
-            showAlert(title: "Invalid IP", message: "Please enter a valid IP address.")
+        if !isValidInputAddress(inputAddress) {
+            showAlert(title: "Invalid Input", message: "Please enter a valid IP address or hostname.")
             return
         }
         
         if rememberIPSwitch.isOn {
-            UserDefaults.standard.set(ipAddress, forKey: "SavedIPAddress")
+            UserDefaults.standard.set(inputAddress, forKey: "SavedIPAddress")
         }
         
-        connectToIP(ipAddress)
+        connectToAddress(inputAddress)
+    }
+    
+    func isValidInputAddress(_ address: String) -> Bool {
+        return isValidIPAddress(address) || isValidHostname(address)
     }
     
     func isValidIPAddress(_ ipAddress: String) -> Bool {
         let ipAddressRegex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
         let ipPredicate = NSPredicate(format: "SELF MATCHES %@", ipAddressRegex)
         return ipPredicate.evaluate(with: ipAddress)
+    }
+    
+    func isValidHostname(_ hostname: String) -> Bool {
+        let hostnameRegex = "^(?=.{1,253}$)(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,63}$"
+        let hostnamePredicate = NSPredicate(format: "SELF MATCHES %@", hostnameRegex)
+        return hostnamePredicate.evaluate(with: hostname)
     }
     
     func showAlert(title: String, message: String) {
@@ -261,14 +271,15 @@ class ViewController: UIViewController {
         }
     }
     
-    private func connectToIP(_ ipAddress: String) {
+    private func connectToAddress(_ address: String) {
         initialOptionsView.isHidden = true
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
         
-        loadWebPage(with: ipAddress)
+        loadWebPage(with: address)
     }
+    
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
         webView.frame = view.bounds
@@ -603,31 +614,31 @@ extension ViewController: NetworkScannerDelegate {
         }
     }
     
-    func loadWebPage(with ipAddress:String) {
+    func loadWebPage(with address: String) {
         DispatchQueue.main.async {
-            self.statusLabel.text = "Trying \(ipAddress)..."
+            self.statusLabel.text = "Trying \(address)..."
             self.retryButton.isHidden = true
             self.logTextView.isHidden = true
             self.spinner.startAnimating()
-            self.ipLabel.text = "\(ipAddress)"
-            let url = URL(string: "http://\(ipAddress):8082")!
+            self.ipLabel.text = "\(address)"
+            let url = URL(string: "http://\(address):8082")!
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) { // 10-second timeout
             if self.webView.isLoading {
                 self.webView.stopLoading()
-                self.handleConnectionFailure(for: ipAddress)
+                self.handleConnectionFailure(for: address)
             }
         }
     }
 
     private func handleConnectionFailure(for ipAddress: String) {
-        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP?", actions: [
+        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP/Hostname?", actions: [
             UIAlertAction(title: "Try Again", style: .default) { _ in
-                self.connectToIP(ipAddress)
+                self.connectToAddress(ipAddress)
             },
-            UIAlertAction(title: "Enter New IP", style: .default) { _ in
+            UIAlertAction(title: "Enter New IP/Hostname", style: .default) { _ in
                 self.initialOptionsView.isHidden = false
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
