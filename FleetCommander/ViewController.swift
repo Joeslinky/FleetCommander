@@ -634,11 +634,11 @@ extension ViewController: NetworkScannerDelegate {
     }
 
     private func handleConnectionFailure(for ipAddress: String) {
-        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP?", actions: [
+        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP/Hostname?", actions: [
             UIAlertAction(title: "Try Again", style: .default) { _ in
                 self.connectToAddress(ipAddress)
             },
-            UIAlertAction(title: "Enter New IP", style: .default) { _ in
+            UIAlertAction(title: "Enter New IP/Hostname", style: .default) { _ in
                 self.initialOptionsView.isHidden = false
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
