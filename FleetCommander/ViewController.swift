@@ -151,7 +151,7 @@ class ViewController: UIViewController {
         initialOptionsView.addSubview(rememberIPSwitch)
     
         rememberIPLabel = UILabel()
-        rememberIPLabel.text = "Remember IP"
+        rememberIPLabel.text = "Remember IP/Hostname"
         if self.traitCollection.userInterfaceStyle == .dark {
             self.rememberIPLabel.textColor = .white
         } else {
