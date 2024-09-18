@@ -584,11 +584,11 @@ extension ViewController: WKNavigationDelegate {
             }
         }
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
         }
-
+        
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
+            handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
         }
     }
     private func logError(_ error: Error, function: String, line: Int) {
