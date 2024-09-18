@@ -202,5 +202,5 @@ protocol NetworkScannerDelegate: AnyObject {
     func showRetryButton()
     func appendLogMessage(_ message: String)
     func updateLogView()
-    func loadWebPage(with ipAddress: String)
+    func loadWebPage(with ipAddress: String, port: Int))
 }
