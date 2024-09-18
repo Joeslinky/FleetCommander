@@ -147,7 +147,7 @@ class NetworkScanner {
                     if success {
                         self.isDeviceFound = true
                         self.isScanning = false
-                        self.delegate?.loadWebPage(with: ipAddress, 8082)
+                        self.delegate?.loadWebPage(with: ipAddress, port: 8082)
                         completion()
                         return
                     } else if ipAddress == ipRange.last {
@@ -176,7 +176,7 @@ class NetworkScanner {
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 completion(true)
                 self.logMessage("Device found at \(ipAddress)")
-                self.delegate?.loadWebPage(with: ipAddress, 8082)
+                self.delegate?.loadWebPage(with: ipAddress, port: 8082)
                 self.isDeviceFound = true
             } else {
                 completion(false)
