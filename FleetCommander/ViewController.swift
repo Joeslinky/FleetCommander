@@ -191,18 +191,18 @@ class ViewController: UIViewController {
             manualIPTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
             manualIPTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
     
-            manualIPButton.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
-            manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-    
-            rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
-            rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
-    
-            rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
-            rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10),
-
             portTextField.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
             portTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
-            portTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor)
+            portTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
+
+            manualIPButton.topAnchor.constraint(equalTo: portTextField.bottomAnchor, constant: 20),
+            manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
+
+            rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
+            rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+
+            rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
+            rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
     }
     
@@ -663,7 +663,9 @@ extension ViewController: NetworkScannerDelegate {
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+            guard let self = self else { return }
             if self.webView.isLoading {
                 self.webView.stopLoading()
                 self.handleConnectionFailure(for: address, port: port)
