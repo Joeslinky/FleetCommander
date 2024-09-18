@@ -178,7 +178,7 @@ class ViewController: UIViewController {
             initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            initialOptionsView.heightAnchor.constraint(equalToConstant: 300),
+            initialOptionsView.bottomAnchor.constraint(equalTo: rememberIPLabel.bottomAnchor, constant: 20),
     
             choiceLabel.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
             choiceLabel.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
