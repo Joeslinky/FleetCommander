@@ -80,7 +80,8 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         
         if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress"),
-           let savedPort = UserDefaults.standard.integer(forKey: "SavedPort") as Int? {
+           UserDefaults.standard.object(forKey: "SavedPort") != nil {
+            let savedPort = UserDefaults.standard.integer(forKey: "SavedPort")
             connectToAddress(savedIP, port: savedPort)
         } else {
             showInitialOptions()
@@ -242,41 +243,42 @@ class ViewController: UIViewController {
         }
     }
     
-   @objc func manualIPButtonTapped() {
+    @objc func manualIPButtonTapped() {
         view.endEditing(true)
         guard let inputAddress = manualIPTextField.text, !inputAddress.isEmpty else {
             showAlert(title: "Error", message: "Please enter an IP address or hostname.")
             return
         }
-        
-        if !isValidInputAddress(inputAddress) {
+    
+        guard isValidInputAddress(inputAddress) else {
             showAlert(title: "Invalid Input", message: "Please enter a valid IP address or hostname.")
             return
         }
-        
-        let port = validateAndGetPort()
-        
+    
+        guard let port = validateAndGetPort() else {
+            return
+        }
+    
         if rememberIPSwitch.isOn {
             UserDefaults.standard.set(inputAddress, forKey: "SavedIPAddress")
             UserDefaults.standard.set(port, forKey: "SavedPort")
         }
-        
+    
         connectToAddress(inputAddress, port: port)
     }
     
-    func validateAndGetPort() -> Int {
+    func validateAndGetPort() -> Int? {
         if let portText = portTextField.text, !portText.isEmpty {
             if let port = Int(portText), port > 0 && port <= 65535 {
                 return port
             } else {
                 showAlert(title: "Invalid Port", message: "Please enter a valid port number between 1 and 65535.")
-                return 8082
+                return nil
             }
         }
         return 8082
     }
-    
-    
+
     func isValidInputAddress(_ address: String) -> Bool {
         return isValidIPAddress(address) || isValidHostname(address)
     }
@@ -584,13 +586,12 @@ extension ViewController: WKNavigationDelegate {
                 print("Photo library access not granted")
             }
         }
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
-        }
-        
-        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
-        }
+    }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
+    }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
     }
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
@@ -726,6 +727,7 @@ extension ViewController: NetworkScannerDelegate {
         }
         present(alert, animated: true, completion: nil)
     }
+
         
     func appendLogMessage(_ message: String) {
         DispatchQueue.main.async {
