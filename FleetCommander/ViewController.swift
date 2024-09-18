@@ -31,6 +31,8 @@ class ViewController: UIViewController {
     var initialOptionsView: UIView!
     var rememberIPLabel: UILabel!
     var choiceLabel: UILabel!
+    var portTextField: UITextField!
+    var loadingTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,8 +79,10 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress") {
-            connectToAddress(savedIP)
+        if let savedIP = UserDefaults.standard.string(forKey: "SavedIPAddress"),
+           UserDefaults.standard.object(forKey: "SavedPort") != nil {
+            let savedPort = UserDefaults.standard.integer(forKey: "SavedPort")
+            connectToAddress(savedIP, port: savedPort)
         } else {
             showInitialOptions()
         }
@@ -90,6 +94,15 @@ class ViewController: UIViewController {
         view.addSubview(initialOptionsView)
         view.bringSubviewToFront(initialOptionsView)
         initialOptionsView.backgroundColor = .systemBackground.withAlphaComponent(0.9)
+
+        portTextField = UITextField()
+        portTextField.placeholder = "Enter Port (default: 8082)"
+        portTextField.borderStyle = .roundedRect
+        portTextField.translatesAutoresizingMaskIntoConstraints = false
+        portTextField.isHidden = true
+        portTextField.delegate = self
+        portTextField.keyboardType = .numberPad
+        initialOptionsView.addSubview(portTextField)
     
         choiceLabel = UILabel()
         choiceLabel.text = "Choose connection method:"
@@ -165,7 +178,7 @@ class ViewController: UIViewController {
             initialOptionsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             initialOptionsView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             initialOptionsView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            initialOptionsView.heightAnchor.constraint(equalToConstant: 300),
+            initialOptionsView.bottomAnchor.constraint(equalTo: rememberIPLabel.bottomAnchor, constant: 20),
     
             choiceLabel.topAnchor.constraint(equalTo: initialOptionsView.topAnchor),
             choiceLabel.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
@@ -180,12 +193,16 @@ class ViewController: UIViewController {
             manualIPTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
             manualIPTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
     
-            manualIPButton.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
+            portTextField.topAnchor.constraint(equalTo: manualIPTextField.bottomAnchor, constant: 10),
+            portTextField.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
+            portTextField.trailingAnchor.constraint(equalTo: initialOptionsView.trailingAnchor),
+
+            manualIPButton.topAnchor.constraint(equalTo: portTextField.bottomAnchor, constant: 20),
             manualIPButton.centerXAnchor.constraint(equalTo: initialOptionsView.centerXAnchor),
-    
+
             rememberIPSwitch.topAnchor.constraint(equalTo: manualIPButton.bottomAnchor, constant: 10),
             rememberIPSwitch.leadingAnchor.constraint(equalTo: initialOptionsView.leadingAnchor),
-    
+
             rememberIPLabel.centerYAnchor.constraint(equalTo: rememberIPSwitch.centerYAnchor),
             rememberIPLabel.leadingAnchor.constraint(equalTo: rememberIPSwitch.trailingAnchor, constant: 10)
         ])
@@ -193,6 +210,7 @@ class ViewController: UIViewController {
     
     @objc func showManualIPEntry() {
         manualIPTextField.isHidden = false
+        portTextField.isHidden = false
         manualIPButton.isHidden = false
         rememberIPSwitch.isHidden = false
         rememberIPLabel.isHidden = false
@@ -215,6 +233,12 @@ class ViewController: UIViewController {
             self.manualEntryButton.isHidden = false
             self.choiceLabel.isHidden = false
             
+            self.manualIPTextField.isHidden = true
+            self.portTextField.isHidden = true
+            self.manualIPButton.isHidden = true
+            self.rememberIPSwitch.isHidden = true
+            self.rememberIPLabel.isHidden = true
+            
             self.view.bringSubviewToFront(self.initialOptionsView)
         }
     }
@@ -225,19 +249,36 @@ class ViewController: UIViewController {
             showAlert(title: "Error", message: "Please enter an IP address or hostname.")
             return
         }
-        
-        if !isValidInputAddress(inputAddress) {
+    
+        guard isValidInputAddress(inputAddress) else {
             showAlert(title: "Invalid Input", message: "Please enter a valid IP address or hostname.")
             return
         }
-        
+    
+        guard let port = validateAndGetPort() else {
+            return
+        }
+    
         if rememberIPSwitch.isOn {
             UserDefaults.standard.set(inputAddress, forKey: "SavedIPAddress")
+            UserDefaults.standard.set(port, forKey: "SavedPort")
         }
-        
-        connectToAddress(inputAddress)
+    
+        connectToAddress(inputAddress, port: port)
     }
     
+    func validateAndGetPort() -> Int? {
+        if let portText = portTextField.text, !portText.isEmpty {
+            if let port = Int(portText), port > 0 && port <= 65535 {
+                return port
+            } else {
+                showAlert(title: "Invalid Port", message: "Please enter a valid port number between 1 and 65535.")
+                return nil
+            }
+        }
+        return 8082
+    }
+
     func isValidInputAddress(_ address: String) -> Bool {
         return isValidIPAddress(address) || isValidHostname(address)
     }
@@ -271,13 +312,13 @@ class ViewController: UIViewController {
         }
     }
     
-    private func connectToAddress(_ address: String) {
+    private func connectToAddress(_ address: String, port: Int) {
         initialOptionsView.isHidden = true
         spinner.isHidden = false
         statusLabel.isHidden = false
         logTextView.isHidden = false
         
-        loadWebPage(with: address)
+        loadWebPage(with: address, port: port)
     }
     
     override func viewSafeAreaInsetsDidChange() {
@@ -545,13 +586,12 @@ extension ViewController: WKNavigationDelegate {
                 print("Photo library access not granted")
             }
         }
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
-        }
-
-        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            handleConnectionFailure(for: webView.url?.host ?? "unknown IP")
-        }
+    }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
+    }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleConnectionFailure(for: webView.url?.host ?? "unknown IP", port: webView.url?.port ?? 8082)
     }
     private func logError(_ error: Error, function: String, line: Int) {
         print("Error in \(function) at line \(line): \(error)")
@@ -614,50 +654,68 @@ extension ViewController: NetworkScannerDelegate {
         }
     }
     
-    func loadWebPage(with address: String) {
+     func loadWebPage(with address: String, port: Int) {
         DispatchQueue.main.async {
-            self.statusLabel.text = "Trying \(address)..."
+            self.statusLabel.text = "Trying \(address):\(port)..."
             self.retryButton.isHidden = true
             self.logTextView.isHidden = true
             self.spinner.startAnimating()
-            self.ipLabel.text = "\(address)"
-            let url = URL(string: "http://\(address):8082")!
+            self.ipLabel.text = "\(address):\(port)"
+            let url = URL(string: "http://\(address):\(port)")!
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
+            
+            self.startLoadingTimer(for: address, port: port)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { // 10-second timeout
+    }
+
+    private func startLoadingTimer(for address: String, port: Int) {
+        loadingTimer?.invalidate()
+        
+        loadingTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+            self?.handleTimeout(for: address, port: port)
+        }
+    }
+
+    private func handleTimeout(for address: String, port: Int) {
+        DispatchQueue.main.async {
             if self.webView.isLoading {
                 self.webView.stopLoading()
-                self.handleConnectionFailure(for: address)
+                self.handleConnectionFailure(for: address, port: port)
             }
         }
     }
 
-    private func handleConnectionFailure(for ipAddress: String) {
-        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress). Would you like to try again or enter a new IP/Hostname?", actions: [
+    private func handleConnectionFailure(for ipAddress: String, port: Int) {
+        showAlert(title: "Connection Failed", message: "Failed to connect to \(ipAddress):\(port). Would you like to try again or enter a new IP/Hostname?", actions: [
             UIAlertAction(title: "Try Again", style: .default) { _ in
-                self.connectToAddress(ipAddress)
+                self.connectToAddress(ipAddress, port: port)
             },
             UIAlertAction(title: "Enter New IP/Hostname", style: .default) { _ in
                 self.initialOptionsView.isHidden = false
+                self.statusLabel.text = "Connection Failed"
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
                 self.manualIPTextField.isHidden = false
-                self.manualEntryButton.isHidden = true;
-                self.autodiscoveryButton.isHidden = true;
+                self.portTextField.isHidden = false
+                self.manualEntryButton.isHidden = true
+                self.autodiscoveryButton.isHidden = true
                 self.manualIPButton.isHidden = false
                 self.rememberIPSwitch.isHidden = false
                 self.rememberIPLabel.isHidden = false
                 self.choiceLabel.isHidden = true
                 self.manualIPTextField.text = ipAddress
+                self.portTextField.text = "\(port)"
             },
             UIAlertAction(title: "Cancel", style: .cancel) { _ in
                 self.showInitialOptions()
                 self.manualIPTextField.isHidden = true
+                self.portTextField.isHidden = true
                 self.manualIPButton.isHidden = true
                 self.rememberIPSwitch.isHidden = true
                 self.rememberIPLabel.isHidden = true
                 UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
+                UserDefaults.standard.removeObject(forKey: "SavedPort")
             }
         ])
     }
@@ -669,6 +727,7 @@ extension ViewController: NetworkScannerDelegate {
         }
         present(alert, animated: true, completion: nil)
     }
+
         
     func appendLogMessage(_ message: String) {
         DispatchQueue.main.async {
@@ -700,7 +759,11 @@ extension ViewController: UIScrollViewDelegate {
 extension ViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        manualIPButtonTapped()
+        if textField == manualIPTextField {
+            portTextField.becomeFirstResponder()
+        } else if textField == portTextField {
+            manualIPButtonTapped()
+        }
         return true
     }
 }
