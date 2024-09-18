@@ -32,6 +32,7 @@ class ViewController: UIViewController {
     var rememberIPLabel: UILabel!
     var choiceLabel: UILabel!
     var portTextField: UITextField!
+    var loadingTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -652,7 +653,7 @@ extension ViewController: NetworkScannerDelegate {
         }
     }
     
-    func loadWebPage(with address: String, port: Int) {
+     func loadWebPage(with address: String, port: Int) {
         DispatchQueue.main.async {
             self.statusLabel.text = "Trying \(address):\(port)..."
             self.retryButton.isHidden = true
@@ -662,10 +663,21 @@ extension ViewController: NetworkScannerDelegate {
             let url = URL(string: "http://\(address):\(port)")!
             self.webView.load(URLRequest(url: url))
             self.webView.allowsBackForwardNavigationGestures = false
+            
+            self.startLoadingTimer(for: address, port: port)
         }
+    }
+
+    private func startLoadingTimer(for address: String, port: Int) {
+        loadingTimer?.invalidate()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
-            guard let self = self else { return }
+        loadingTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+            self?.handleTimeout(for: address, port: port)
+        }
+    }
+
+    private func handleTimeout(for address: String, port: Int) {
+        DispatchQueue.main.async {
             if self.webView.isLoading {
                 self.webView.stopLoading()
                 self.handleConnectionFailure(for: address, port: port)
@@ -680,6 +692,7 @@ extension ViewController: NetworkScannerDelegate {
             },
             UIAlertAction(title: "Enter New IP/Hostname", style: .default) { _ in
                 self.initialOptionsView.isHidden = false
+                self.statusLabel.text = "Connection Failed"
                 self.spinner.isHidden = true
                 self.statusLabel.isHidden = true
                 self.manualIPTextField.isHidden = false
