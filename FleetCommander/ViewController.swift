@@ -454,10 +454,14 @@ class ViewController: UIViewController {
         }
     }
     @objc func ipLabelTapped() {
+        webView.load(URLRequest(url: URL(string:"about:blank")!))
         UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
         UserDefaults.standard.removeObject(forKey: "SavedPort")
-        webView.load(URLRequest(url: URL(string:"about:blank")!))
         showInitialOptions()
+        DispatchQueue.main.async {
+            self.refreshButton.isHidden = true
+            self.ipLabel.isHidden = true
+        }
     }
     @objc func appBecameActive() {
         webView.reload()
