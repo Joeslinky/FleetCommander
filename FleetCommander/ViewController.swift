@@ -301,7 +301,7 @@ class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    @objc func autodiscoveryButtonTapped() {
+    @objc func autodiscoveryButton() {
         initialOptionsView.isHidden = true
         spinner.isHidden = false
         statusLabel.isHidden = false
@@ -409,7 +409,7 @@ class ViewController: UIViewController {
             ])
             self.ipLabel.isHidden = true
             self.ipLabel.isUserInteractionEnabled = true
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.ipLabelTapped))
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.ipLabel))
             self.ipLabel.addGestureRecognizer(tapGesture)
         }
     }
@@ -454,7 +454,9 @@ class ViewController: UIViewController {
         }
     }
     @objc func ipLabelTapped() {
-        reinitializeFirstViewController()
+        UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
+        UserDefaults.standard.removeObject(forKey: "SavedPort")
+        showInitialOptions()
     }
     @objc func appBecameActive() {
         webView.reload()
