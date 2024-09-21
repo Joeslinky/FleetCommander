@@ -456,6 +456,7 @@ class ViewController: UIViewController {
     @objc func ipLabelTapped() {
         UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
         UserDefaults.standard.removeObject(forKey: "SavedPort")
+        view.sendSubviewToBack(webView)
         showInitialOptions()
     }
     @objc func appBecameActive() {
