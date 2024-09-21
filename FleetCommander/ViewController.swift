@@ -301,7 +301,7 @@ class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    @objc func autodiscoveryButton() {
+    @objc func autodiscoveryButtonTapped() {
         initialOptionsView.isHidden = true
         spinner.isHidden = false
         statusLabel.isHidden = false
@@ -409,7 +409,7 @@ class ViewController: UIViewController {
             ])
             self.ipLabel.isHidden = true
             self.ipLabel.isUserInteractionEnabled = true
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.ipLabel))
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.ipLabelTapped))
             self.ipLabel.addGestureRecognizer(tapGesture)
         }
     }
