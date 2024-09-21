@@ -33,6 +33,11 @@ class ViewController: UIViewController {
     var choiceLabel: UILabel!
     var portTextField: UITextField!
     var loadingTimer: Timer?
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -454,7 +459,14 @@ class ViewController: UIViewController {
         }
     }
     @objc func ipLabelTapped() {
-        reinitializeFirstViewController()
+        webView.load(URLRequest(url: URL(string:"about:blank")!))
+        UserDefaults.standard.removeObject(forKey: "SavedIPAddress")
+        UserDefaults.standard.removeObject(forKey: "SavedPort")
+        showInitialOptions()
+        DispatchQueue.main.async {
+            self.refreshButton.isHidden = true
+            self.ipLabel.isHidden = true
+        }
     }
     @objc func appBecameActive() {
         webView.reload()
@@ -497,8 +509,6 @@ class ViewController: UIViewController {
         DispatchQueue.main.async {
             self.statusLabel.text = ""
             self.spinner.stopAnimating()
-            self.refreshButton.isHidden = false
-            self.ipLabel.isHidden = false
             self.retryButton.isHidden = true
         }
     }
@@ -659,6 +669,8 @@ extension ViewController: NetworkScannerDelegate {
             self.statusLabel.text = "Trying \(address):\(port)..."
             self.retryButton.isHidden = true
             self.logTextView.isHidden = true
+            self.refreshButton.isHidden = false
+            self.ipLabel.isHidden = false
             self.spinner.startAnimating()
             self.ipLabel.text = "\(address):\(port)"
             let url = URL(string: "http://\(address):\(port)")!
