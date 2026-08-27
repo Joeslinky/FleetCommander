@@ -16,7 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         let initialViewController = ViewController()
         self.window?.rootViewController = initialViewController
-        self.window?.backgroundColor = UIColor.systemBackground
+        self.window?.backgroundColor = AppTheme.background
+        self.window?.overrideUserInterfaceStyle = .dark
         self.window?.makeKeyAndVisible()
         return true
     }

@@ -20,7 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = ViewController()
         self.window = window
-        window.backgroundColor = UIColor.systemBackground
+        window.backgroundColor = AppTheme.background
+        window.overrideUserInterfaceStyle = .dark
         window.makeKeyAndVisible()
     }
 
