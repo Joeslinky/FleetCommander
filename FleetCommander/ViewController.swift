@@ -3,7 +3,7 @@ import WebKit
 import Photos
 
 final class ViewController: UIViewController {
-    private let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
+    private var webView: WKWebView!
     private let connectionView = ConnectionView()
     private let connectedBar = ConnectedBarView()
     private let networkScanner = NetworkScanner()
@@ -14,6 +14,8 @@ final class ViewController: UIViewController {
     private var downloadAlert: UIAlertController?
     private var downloadProgressLabel: UILabel?
 
+    override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
+
     private enum ConnectionAction {
         case discover
         case connect(address: String, port: Int)
@@ -21,7 +23,8 @@ final class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGroupedBackground
+        overrideUserInterfaceStyle = .dark
+        view.backgroundColor = AppTheme.background
         AppTheme.apply()
         setupWebView()
         setupConnectionView()
@@ -47,20 +50,21 @@ final class ViewController: UIViewController {
     }
 
     private func setupWebView() {
+        let configuration = WKWebViewConfiguration()
+        configuration.defaultWebpagePreferences.preferredContentMode = .mobile
+        configuration.allowsInlineMediaPlayback = true
+
+        webView = WKWebView(frame: .zero, configuration: configuration)
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.backgroundColor = .systemBackground
-        webView.isOpaque = false
+        webView.backgroundColor = AppTheme.background
+        webView.isOpaque = true
         webView.navigationDelegate = self
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
+        webView.scrollView.backgroundColor = AppTheme.background
         webView.allowsBackForwardNavigationGestures = false
-        view.addSubview(webView)
-        NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
+        webView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        webView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
     }
 
     private func setupConnectionView() {
@@ -76,15 +80,20 @@ final class ViewController: UIViewController {
     }
 
     private func setupConnectedBar() {
-        connectedBar.translatesAutoresizingMaskIntoConstraints = false
         connectedBar.isHidden = true
         connectedBar.onRefresh = { [weak self] in self?.webView.reload() }
         connectedBar.onAddressTap = { [weak self] in self?.presentDeviceActions() }
-        view.addSubview(connectedBar)
+
+        let chromeStack = UIStackView(arrangedSubviews: [connectedBar, webView])
+        chromeStack.axis = .vertical
+        chromeStack.spacing = 0
+        chromeStack.translatesAutoresizingMaskIntoConstraints = false
+        view.insertSubview(chromeStack, at: 0)
         NSLayoutConstraint.activate([
-            connectedBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            connectedBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            connectedBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+            chromeStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            chromeStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            chromeStack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            chromeStack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         ])
     }
 
@@ -110,7 +119,7 @@ final class ViewController: UIViewController {
     }
 
     private func presentDeviceActions() {
-        let sheet = UIAlertController(title: currentHostTitle, message: "You're connected to Fleet Manager.", preferredStyle: .actionSheet)
+        let sheet = UIAlertController(title: currentHostTitle, message: "You're connected to The Pond.", preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: "Refresh", style: .default) { [weak self] _ in
             self?.webView.reload()
         })
@@ -158,6 +167,10 @@ extension ViewController: ConnectionViewDelegate {
         connect(to: address, port: port, fromDiscovery: false)
     }
 
+    func connectionView(_ view: ConnectionView, didSelect device: DiscoveredDevice) {
+        connect(to: device.address, port: device.port, fromDiscovery: true)
+    }
+
     func connectionViewDidCancel(_ view: ConnectionView) {
         loadingTimer?.invalidate()
         networkScanner.cancel()
@@ -179,8 +192,8 @@ extension ViewController: NetworkScannerDelegate {
     func showRetryButton() {
         DispatchQueue.main.async {
             self.connectionView.showFailed(
-                title: "No device found",
-                message: "Make sure this phone and your comma device are on the same Wi-Fi, and Fleet Manager is running."
+                title: "No Pond found",
+                message: "Make sure this phone and your comma device are on the same Wi-Fi, and The Pond is running."
             )
         }
     }
@@ -193,9 +206,29 @@ extension ViewController: NetworkScannerDelegate {
 
     func updateLogView() {}
 
+    func networkScanner(_ scanner: NetworkScanner, didDiscover devices: [DiscoveredDevice], ignoredOpenPorts: Int) {
+        DispatchQueue.main.async {
+            if devices.isEmpty {
+                let extra = ignoredOpenPorts > 0
+                    ? " Found \(ignoredOpenPorts) other device\(ignoredOpenPorts == 1 ? "" : "s") on port 8082 that weren’t The Pond."
+                    : ""
+                self.connectionView.showFailed(
+                    title: "No Pond found",
+                    message: "Make sure this phone and your comma device are on the same Wi-Fi, and The Pond is running.\(extra)"
+                )
+                return
+            }
+            if devices.count == 1 {
+                let device = devices[0]
+                self.loadWebPage(with: device.address, port: device.port)
+                return
+            }
+            self.connectionView.showPicker(devices: devices)
+        }
+    }
+
     func loadWebPage(with address: String, port: Int) {
         DispatchQueue.main.async {
-            self.lastAction = .connect(address: address, port: port)
             self.currentAddress = address
             self.currentPort = port
             self.connectionView.isHidden = false
@@ -248,13 +281,32 @@ private extension ViewController {
         }
         connectionView.isHidden = true
         connectedBar.isHidden = false
-        view.bringSubviewToFront(connectedBar)
+    }
+
+    private func applyPondLayoutFixes() {
+        let script = """
+        (function() {
+          var style = document.getElementById('lilypad-mobile');
+          if (!style) {
+            style = document.createElement('style');
+            style.id = 'lilypad-mobile';
+            document.documentElement.appendChild(style);
+          }
+          style.textContent = [
+            'html, body { background-color: #0b1b0b !important; }',
+            '#menu_button { bottom: 1rem !important; right: 1rem !important; }',
+            '.sidebar { top: 0 !important; height: 100% !important; }'
+          ].join('\\n');
+        })();
+        """
+        webView.evaluateJavaScript(script, completionHandler: nil)
     }
 }
 
 extension ViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard webView.url?.absoluteString != "about:blank" else { return }
+        applyPondLayoutFixes()
         markConnected()
     }
 
@@ -319,19 +371,19 @@ extension ViewController: WKNavigationDelegate {
                 guard let assetChangeRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: localURL),
                       let placeholder = assetChangeRequest.placeholderForCreatedAsset else { return }
                 let options = PHFetchOptions()
-                options.predicate = NSPredicate(format: "title = %@", "FleetCommander")
+                options.predicate = NSPredicate(format: "title = %@", "LilyPad")
                 let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: options)
                 let albumRequest: PHAssetCollectionChangeRequest
                 if let album = collection.firstObject {
                     albumRequest = PHAssetCollectionChangeRequest(for: album)!
                 } else {
-                    albumRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "FleetCommander")
+                    albumRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "LilyPad")
                 }
                 albumRequest.addAssets([placeholder] as NSArray)
             }) { success, error in
                 DispatchQueue.main.async {
                     if success {
-                        self.finishDownload(success: true, message: "Saved to your FleetCommander album.")
+                        self.finishDownload(success: true, message: "Saved to your LilyPad album.")
                     } else {
                         self.finishDownload(success: false, message: error?.localizedDescription ?? "Could not save the video.")
                     }
@@ -381,60 +433,60 @@ final class ConnectedBarView: UIView {
     var onRefresh: (() -> Void)?
     var onAddressTap: (() -> Void)?
 
+    private let logoView = UIImageView(image: UIImage(named: "LilyPad"))
     private let addressButton = UIButton(type: .system)
     private let refreshButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.94)
-        layer.cornerRadius = 18
-        layer.cornerCurve = .continuous
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.18
-        layer.shadowRadius = 12
-        layer.shadowOffset = CGSize(width: 0, height: 4)
+        backgroundColor = AppTheme.surface
+
+        logoView.translatesAutoresizingMaskIntoConstraints = false
+        logoView.contentMode = .scaleAspectFit
 
         var addressConfig = UIButton.Configuration.plain()
-        addressConfig.image = UIImage(systemName: "circle.fill")
-        addressConfig.imagePadding = 8
-        addressConfig.baseForegroundColor = .label
+        addressConfig.baseForegroundColor = AppTheme.text
         addressConfig.titleAlignment = .leading
+        addressConfig.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
         addressConfig.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
             outgoing.font = UIFont.systemFont(ofSize: 11, weight: .regular)
-            outgoing.foregroundColor = UIColor.secondaryLabel
+            outgoing.foregroundColor = AppTheme.textMuted
             return outgoing
         }
         addressConfig.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
             outgoing.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
+            outgoing.foregroundColor = AppTheme.text
             return outgoing
         }
         addressButton.configuration = addressConfig
-        addressButton.tintColor = AppTheme.accent
         addressButton.addTarget(self, action: #selector(addressTapped), for: .touchUpInside)
         addressButton.contentHorizontalAlignment = .leading
 
         var refreshConfig = UIButton.Configuration.plain()
         refreshConfig.image = UIImage(systemName: "arrow.clockwise")
-        refreshConfig.baseForegroundColor = AppTheme.accent
+        refreshConfig.baseForegroundColor = AppTheme.accentBright
         refreshButton.configuration = refreshConfig
         refreshButton.addTarget(self, action: #selector(refreshTapped), for: .touchUpInside)
 
-        let stack = UIStackView(arrangedSubviews: [addressButton, refreshButton])
+        let stack = UIStackView(arrangedSubviews: [logoView, addressButton, refreshButton])
         stack.axis = .horizontal
         stack.alignment = .center
+        stack.spacing = 8
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
 
         NSLayoutConstraint.activate([
+            logoView.widthAnchor.constraint(equalToConstant: 32),
+            logoView.heightAnchor.constraint(equalToConstant: 32),
             stack.topAnchor.constraint(equalTo: topAnchor, constant: 4),
             stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-            refreshButton.widthAnchor.constraint(equalToConstant: 44),
-            refreshButton.heightAnchor.constraint(equalToConstant: 44),
-            heightAnchor.constraint(equalToConstant: 60)
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
+            refreshButton.widthAnchor.constraint(equalToConstant: 40),
+            refreshButton.heightAnchor.constraint(equalToConstant: 40),
+            heightAnchor.constraint(equalToConstant: 48)
         ])
     }
 
@@ -446,7 +498,6 @@ final class ConnectedBarView: UIView {
         var config = addressButton.configuration
         config?.title = text
         config?.subtitle = "Tap to change device"
-        config?.imageColorTransformer = UIConfigurationColorTransformer { _ in AppTheme.accent }
         addressButton.configuration = config
         addressButton.accessibilityHint = "Opens options to disconnect or forget this device"
     }

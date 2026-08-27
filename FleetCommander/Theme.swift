@@ -2,13 +2,23 @@ import UIKit
 import Darwin
 
 enum AppTheme {
-    static let accent = UIColor(red: 0.12, green: 0.73, blue: 0.62, alpha: 1)
-    static let accentPressed = UIColor(red: 0.08, green: 0.58, blue: 0.50, alpha: 1)
+    /// Pond `--main-bg`
+    static let background = UIColor(red: 0.043, green: 0.106, blue: 0.043, alpha: 1) // #0b1b0b
+    /// Pond `--secondary-bg` / sidebar
+    static let surface = UIColor(red: 0.149, green: 0.251, blue: 0.149, alpha: 1) // #264026
+    /// Pond `--input-bg`
+    static let input = UIColor(red: 0.184, green: 0.329, blue: 0.196, alpha: 1) // #2f5432
+    /// Pond `--main-fg`
+    static let accent = UIColor(red: 0.090, green: 0.525, blue: 0.263, alpha: 1) // #178643
+    /// Pond `--success-text`
+    static let accentBright = UIColor(red: 0.200, green: 0.820, blue: 0.227, alpha: 1) // #33d13a
+    static let text = UIColor.white
+    static let textMuted = UIColor(red: 0.627, green: 0.627, blue: 0.627, alpha: 1)
     static let cardCornerRadius: CGFloat = 18
     static let controlCornerRadius: CGFloat = 14
 
     static func apply() {
-        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = accent
+        UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = accentBright
     }
 }
 
@@ -70,6 +80,12 @@ enum AddressValidator {
         let hostnameRegex = #"^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$"#
         return NSPredicate(format: "SELF MATCHES %@", hostnameRegex).evaluate(with: value)
     }
+
+    static func ipSortKey(_ ip: String) -> (Int, Int, Int, Int) {
+        let parts = ip.split(separator: ".").compactMap { Int($0) }
+        guard parts.count == 4 else { return (0, 0, 0, 0) }
+        return (parts[0], parts[1], parts[2], parts[3])
+    }
 }
 
 extension UIButton {
@@ -94,7 +110,7 @@ extension UIButton {
     static func appPlain(title: String) -> UIButton {
         var configuration = UIButton.Configuration.plain()
         configuration.title = title
-        configuration.baseForegroundColor = AppTheme.accent
+        configuration.baseForegroundColor = AppTheme.accentBright
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 8, bottom: 10, trailing: 8)
         let button = UIButton(configuration: configuration)
         return button

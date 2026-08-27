@@ -6,6 +6,7 @@ protocol ConnectionViewDelegate: AnyObject {
     func connectionViewDidConnect(_ view: ConnectionView, address: String, port: Int)
     func connectionViewDidCancel(_ view: ConnectionView)
     func connectionViewDidRetryDiscovery(_ view: ConnectionView)
+    func connectionView(_ view: ConnectionView, didSelect device: DiscoveredDevice)
 }
 
 final class ConnectionView: UIView, UITextFieldDelegate {
@@ -16,12 +17,13 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         case manual
         case searching
         case connecting
+        case picker
         case failed
     }
 
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
-    private let brandImageView = UIImageView(image: UIImage(named: "C3X"))
+    private let brandImageView = UIImageView(image: UIImage(named: "LilyPad"))
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
     private let savedCard = ChoiceCardView()
@@ -39,6 +41,8 @@ final class ConnectionView: UIView, UITextFieldDelegate {
     private let retryButton = UIButton.appFilled(title: "Try Again")
     private let enterAddressButton = UIButton.appFilled(title: "Enter Address", color: .secondarySystemFill)
     private let homeButton = UIButton.appPlain(title: "Start Over")
+    private let pickerStack = UIStackView()
+    private var pickerDevices: [DiscoveredDevice] = []
 
     private var currentScreen: Screen = .home
 
@@ -73,7 +77,7 @@ final class ConnectionView: UIView, UITextFieldDelegate {
     func showConnecting(address: String, port: Int) {
         statusLabel.text = "Connecting"
         detailLabel.text = "\(address):\(port)"
-        logLabel.text = "Opening Fleet Manager…"
+        logLabel.text = "Opening The Pond…"
         apply(screen: .connecting)
         spinner.startAnimating()
     }
@@ -93,6 +97,17 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         logLabel.text = text
     }
 
+    func showPicker(devices: [DiscoveredDevice]) {
+        let saved = ConnectionStore.savedAddress
+        pickerDevices = devices.sorted { lhs, rhs in
+            if lhs.address == saved { return true }
+            if rhs.address == saved { return false }
+            return AddressValidator.ipSortKey(lhs.address) < AddressValidator.ipSortKey(rhs.address)
+        }
+        rebuildPickerCards()
+        apply(screen: .picker)
+    }
+
     func prefill(address: String?, port: Int?) {
         if let address, !address.isEmpty { addressField.text = address }
         if let port { portField.text = "\(port)" }
@@ -107,7 +122,7 @@ final class ConnectionView: UIView, UITextFieldDelegate {
     }
 
     private func setup() {
-        backgroundColor = .systemGroupedBackground
+        backgroundColor = AppTheme.background
         scrollView.keyboardDismissMode = .onDrag
         scrollView.alwaysBounceVertical = true
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -121,16 +136,16 @@ final class ConnectionView: UIView, UITextFieldDelegate {
 
         brandImageView.contentMode = .scaleAspectFit
         brandImageView.translatesAutoresizingMaskIntoConstraints = false
-        brandImageView.heightAnchor.constraint(equalToConstant: 88).isActive = true
+        brandImageView.heightAnchor.constraint(equalToConstant: 128).isActive = true
 
-        titleLabel.text = "FleetCommander"
+        titleLabel.text = "LilyPad"
         titleLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
-        titleLabel.textColor = .label
+        titleLabel.textColor = AppTheme.text
         titleLabel.textAlignment = .center
 
-        subtitleLabel.text = "Connect to Fleet Manager on your comma device."
+        subtitleLabel.text = "Connect to The Pond on your comma device."
         subtitleLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.textColor = AppTheme.textMuted
         subtitleLabel.textAlignment = .center
         subtitleLabel.numberOfLines = 0
 
@@ -142,7 +157,7 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         discoverCard.configure(
             symbol: "wifi",
             title: "Find on this network",
-            subtitle: "Looks for Fleet Manager on port 8082."
+            subtitle: "Finds The Pond, not just anything on port 8082."
         )
         manualCard.configure(
             symbol: "keyboard",
@@ -153,6 +168,10 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         savedCard.addTarget(self, action: #selector(reconnectTapped), for: .touchUpInside)
         discoverCard.addTarget(self, action: #selector(discoverTapped), for: .touchUpInside)
         manualCard.addTarget(self, action: #selector(manualTapped), for: .touchUpInside)
+
+        pickerStack.axis = .vertical
+        pickerStack.spacing = 12
+        pickerStack.alignment = .fill
 
         configureField(addressField, placeholder: "IP address or hostname", keyboard: .URL)
         addressField.autocapitalizationType = .none
@@ -172,8 +191,8 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
         var enterConfiguration = UIButton.Configuration.filled()
         enterConfiguration.title = "Enter Address"
-        enterConfiguration.baseBackgroundColor = .tertiarySystemFill
-        enterConfiguration.baseForegroundColor = .label
+        enterConfiguration.baseBackgroundColor = AppTheme.input
+        enterConfiguration.baseForegroundColor = AppTheme.text
         enterConfiguration.cornerStyle = .fixed
         enterConfiguration.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16)
         enterAddressButton.configuration = enterConfiguration
@@ -182,27 +201,27 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         enterAddressButton.addTarget(self, action: #selector(manualTapped), for: .touchUpInside)
         homeButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
 
-        spinner.color = AppTheme.accent
+        spinner.color = AppTheme.accentBright
         spinner.hidesWhenStopped = true
 
         statusLabel.font = UIFont.systemFont(ofSize: 22, weight: .semibold)
-        statusLabel.textColor = .label
+        statusLabel.textColor = AppTheme.text
         statusLabel.textAlignment = .center
         statusLabel.numberOfLines = 0
 
         detailLabel.font = UIFont.systemFont(ofSize: 15, weight: .regular)
-        detailLabel.textColor = .secondaryLabel
+        detailLabel.textColor = AppTheme.textMuted
         detailLabel.textAlignment = .center
         detailLabel.numberOfLines = 0
 
         logLabel.font = UIFont.monospacedSystemFont(ofSize: 13, weight: .regular)
-        logLabel.textColor = .tertiaryLabel
+        logLabel.textColor = AppTheme.textMuted
         logLabel.textAlignment = .center
         logLabel.numberOfLines = 3
 
         [
             brandImageView, titleLabel, subtitleLabel, savedCard, discoverCard, manualCard,
-            addressField, portField, connectButton, backButton, spinner, statusLabel,
+            pickerStack, addressField, portField, connectButton, backButton, spinner, statusLabel,
             detailLabel, logLabel, cancelButton, retryButton, enterAddressButton, homeButton
         ].forEach { contentStack.addArrangedSubview($0) }
 
@@ -242,19 +261,26 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         let manual = screen == .manual
         let searching = screen == .searching
         let connecting = screen == .connecting
+        let picker = screen == .picker
         let failed = screen == .failed
         let progress = searching || connecting
 
         brandImageView.isHidden = !home && !manual
-        titleLabel.isHidden = !home && !manual
-        detailLabel.textColor = .secondaryLabel
-        subtitleLabel.text = manual
-            ? "Enter the address shown in Fleet Manager."
-            : "Connect to Fleet Manager on your comma device."
-        subtitleLabel.isHidden = !home && !manual
+        titleLabel.isHidden = !home && !manual && !picker
+        titleLabel.text = picker ? "Choose a device" : "LilyPad"
+        detailLabel.textColor = AppTheme.textMuted
+        if picker {
+            subtitleLabel.text = "More than one Pond is on this network. Pick the one you want."
+        } else if manual {
+            subtitleLabel.text = "Enter the address shown in The Pond."
+        } else {
+            subtitleLabel.text = "Connect to The Pond on your comma device."
+        }
+        subtitleLabel.isHidden = !home && !manual && !picker
         savedCard.isHidden = !home || saved == nil
         discoverCard.isHidden = !home
         manualCard.isHidden = !home
+        pickerStack.isHidden = !picker
         addressField.isHidden = !manual
         portField.isHidden = !manual
         connectButton.isHidden = !manual
@@ -265,17 +291,44 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         detailLabel.isHidden = !progress && !failed
         logLabel.isHidden = !searching
         cancelButton.isHidden = !progress
-        retryButton.isHidden = !failed
+        retryButton.isHidden = !failed && !picker
+        retryButton.setTitle(picker ? "Scan Again" : "Try Again", for: .normal)
         enterAddressButton.isHidden = !failed
-        homeButton.isHidden = !failed
+        homeButton.isHidden = !failed && !picker
         backButton.setTitle(manual ? "Back" : "Start Over", for: .normal)
+    }
+
+    private func rebuildPickerCards() {
+        pickerStack.arrangedSubviews.forEach { view in
+            pickerStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        let saved = ConnectionStore.savedAddress
+        for (index, device) in pickerDevices.enumerated() {
+            let card = ChoiceCardView()
+            let isSaved = device.address == saved
+            card.configure(
+                symbol: isSaved ? "star.circle.fill" : "leaf.circle.fill",
+                title: device.name,
+                subtitle: isSaved ? "\(device.address):\(device.port)  ·  Last used" : "\(device.address):\(device.port)"
+            )
+            card.tag = index
+            card.addTarget(self, action: #selector(pickerCardTapped(_:)), for: .touchUpInside)
+            pickerStack.addArrangedSubview(card)
+        }
+    }
+
+    @objc private func pickerCardTapped(_ sender: UIControl) {
+        let index = sender.tag
+        guard pickerDevices.indices.contains(index) else { return }
+        delegate?.connectionView(self, didSelect: pickerDevices[index])
     }
 
     private func configureField(_ field: UITextField, placeholder: String, keyboard: UIKeyboardType) {
         field.placeholder = placeholder
         field.keyboardType = keyboard
         field.borderStyle = .none
-        field.backgroundColor = .secondarySystemGroupedBackground
+        field.backgroundColor = AppTheme.input
         field.layer.cornerRadius = 12
         field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 14, height: 1))
         field.leftViewMode = .always
@@ -283,7 +336,11 @@ final class ConnectionView: UIView, UITextFieldDelegate {
         field.rightViewMode = .always
         field.heightAnchor.constraint(equalToConstant: 50).isActive = true
         field.font = UIFont.systemFont(ofSize: 16)
-        field.textColor = .label
+        field.textColor = AppTheme.text
+        field.attributedPlaceholder = NSAttributedString(
+            string: placeholder,
+            attributes: [.foregroundColor: AppTheme.textMuted]
+        )
     }
 
     private func addDoneToolbar(to field: UITextField) {
@@ -293,7 +350,7 @@ final class ConnectionView: UIView, UITextFieldDelegate {
             UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
             UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneEditing))
         ]
-        toolbar.tintColor = AppTheme.accent
+        toolbar.tintColor = AppTheme.accentBright
         field.inputAccessoryView = toolbar
     }
 
@@ -377,20 +434,20 @@ final class ChoiceCardView: UIControl {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .secondarySystemGroupedBackground
+        backgroundColor = AppTheme.surface
         layer.cornerRadius = AppTheme.cardCornerRadius
         layer.cornerCurve = .continuous
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = AppTheme.accent
+        iconView.tintColor = AppTheme.accentBright
         iconView.contentMode = .scaleAspectFit
         iconView.setContentHuggingPriority(.required, for: .horizontal)
 
         titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        titleLabel.textColor = .label
+        titleLabel.textColor = AppTheme.text
 
         subtitleLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.textColor = AppTheme.textMuted
         subtitleLabel.numberOfLines = 2
 
         let textStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
